@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -7,7 +8,14 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.close))],
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await windowManager.close();
+            },
+            icon: Icon(Icons.close),
+          ),
+        ],
       ),
       body: Center(child: Text('Hello World!')),
     );
