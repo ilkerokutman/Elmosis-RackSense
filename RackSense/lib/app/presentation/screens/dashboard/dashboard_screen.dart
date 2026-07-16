@@ -25,7 +25,28 @@ class DashboardScreen extends StatelessWidget {
           ),
           IconButton(
             onPressed: () async {
-              await windowManager.close();
+              final shouldExit = await showDialog<bool>(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  title: const Text('Exit'),
+                  content: const Text(
+                    'RackSense uygulamasını sonlandırmak istediğinizden emin misiniz?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: const Text('İptal'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      child: const Text('Sonlandır'),
+                    ),
+                  ],
+                ),
+              );
+              if (shouldExit == true) {
+                await windowManager.close();
+              }
             },
             icon: Icon(Icons.close),
           ),
