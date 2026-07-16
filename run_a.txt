@@ -1,0 +1,1 @@
+./scripts/build.sh &&  ./scripts/deploy.sh 0.1.0+1 192.168.0.66
