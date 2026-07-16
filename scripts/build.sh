@@ -90,6 +90,21 @@ set -e
 REMOTE_WORK_DIR="$1"
 LOCAL_APP_DIR="$2"
 
+# Ensure Flutter is available in non-interactive SSH sessions.
+if ! command -v flutter >/dev/null 2>&1; then
+  for FLUTTER_DIR in "$HOME/flutter" "$HOME/development/flutter" "/usr/local/flutter" "/opt/flutter"; do
+    if [ -d "${FLUTTER_DIR}/bin" ]; then
+      export PATH="${FLUTTER_DIR}/bin:$PATH"
+      break
+    fi
+  done
+fi
+
+if ! command -v flutter >/dev/null 2>&1; then
+  echo "Error: flutter command not found on the build server." >&2
+  exit 1
+fi
+
 cd "${REMOTE_WORK_DIR}/${LOCAL_APP_DIR}"
 flutter clean
 flutter pub get
