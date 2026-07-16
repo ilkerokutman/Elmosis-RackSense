@@ -44,7 +44,7 @@ echo "Bundle: ${BUNDLE_PATH}"
 # Stage 2: Kill any running rack_sense on target
 # ------------------------------------------------------------------------------
 echo "=== Stage 2: Kill rack_sense on target ==="
-ssh "${TARGET_USER}@${TARGET_HOST}" 'sudo pkill -f rack_sense || true'
+ssh "${TARGET_USER}@${TARGET_HOST}" 'sudo pkill -x rack_sense || true'
 
 # Stage 3: Remove the application folder on target
 # ------------------------------------------------------------------------------
