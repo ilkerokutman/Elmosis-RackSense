@@ -41,7 +41,7 @@ class MainController extends GetxController {
   RxBool get backDoorOpenRx => _backDoorOpen;
   bool get backDoorOpen => _backDoorOpen.value;
 
-  final RxBool _serviceRequired = false.obs;
-  RxBool get serviceRequiredRx => _serviceRequired;
-  bool get serviceRequired => _serviceRequired.value;
+  final RxBool _serviceDoorOpen = false.obs;
+  RxBool get serviceDoorOpenRx => _serviceDoorOpen;
+  bool get serviceDoorOpen => _serviceDoorOpen.value;
 }
