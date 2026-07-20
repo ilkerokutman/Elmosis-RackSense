@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
-import 'package:rack_sense/app/presentation/components/app_bar.dart';
-import 'package:rack_sense/app/presentation/components/nav_rail.dart';
+import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -11,20 +10,18 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<AppController>(
       builder: (ac) {
-        return Scaffold(
-          body: Row(
-            children: [
-              NavRailWidget(selectedIndex: 0),
-              VerticalDivider(),
-              Expanded(
-                child: Column(
-                  children: [
-                    AppBarWidget(),
-                    Expanded(child: Center(child: Text('hello'))),
-                  ],
-                ),
-              ),
-            ],
+        return AppScaffold(
+          selectedIndex: 0,
+          body: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                Text('Dashboard'),
+                Text('gpio: ${ac.isGpioReady}'),
+                Text('acunit: ${ac.acUnitList.length}'),
+              ],
+            ),
           ),
         );
       },
