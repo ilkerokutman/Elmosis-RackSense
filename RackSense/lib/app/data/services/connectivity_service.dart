@@ -36,10 +36,11 @@ class ConnectivityService extends GetxController {
     );
     update();
 
-    if (wasConnected != _isConnected) {
+    if (wasConnected != _isConnected.value) {
       _connectionController.add(_isConnected.value);
       onConnectionChanged?.call(_isConnected.value);
     }
+    print('Connection Updated, isConnected => $isConnected');
   }
 
   Future<bool> checkConnection() async {
