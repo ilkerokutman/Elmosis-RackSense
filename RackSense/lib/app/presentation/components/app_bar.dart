@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rack_sense/app/core/routes/routes.dart';
-import 'package:rack_sense/app/core/utils/common_utils.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 
 class AppBarWidget extends StatelessWidget {

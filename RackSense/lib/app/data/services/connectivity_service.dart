@@ -2,13 +2,15 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:get/get.dart';
 
-class ConnectivityService {
+class ConnectivityService extends GetxController {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _subscription;
 
-  bool _isConnected = false;
-  bool get isConnected => _isConnected;
+  final RxBool _isConnected = false.obs;
+  RxBool get isConnectedRx => _isConnected;
+  bool get isConnected => _isConnected.value;
 
   final _connectionController = StreamController<bool>.broadcast();
   Stream<bool> get connectionStream => _connectionController.stream;
@@ -26,27 +28,28 @@ class ConnectivityService {
 
   void _updateConnectionStatus(List<ConnectivityResult> results) {
     final wasConnected = _isConnected;
-    _isConnected = results.any(
+    _isConnected.value = results.any(
       (r) =>
           r == ConnectivityResult.wifi ||
           r == ConnectivityResult.ethernet ||
           r == ConnectivityResult.mobile,
     );
+    update();
 
     if (wasConnected != _isConnected) {
-      _connectionController.add(_isConnected);
-      onConnectionChanged?.call(_isConnected);
+      _connectionController.add(_isConnected.value);
+      onConnectionChanged?.call(_isConnected.value);
     }
   }
 
   Future<bool> checkConnection() async {
     final results = await _connectivity.checkConnectivity();
     _updateConnectionStatus(results);
-    return _isConnected;
+    return _isConnected.value;
   }
 
   Future<bool> hasInternetAccess() async {
-    if (!_isConnected) return false;
+    if (!_isConnected.value) return false;
 
     try {
       final result = await InternetAddress.lookup(
@@ -58,8 +61,10 @@ class ConnectivityService {
     }
   }
 
+  @override
   void dispose() {
     _subscription?.cancel();
     _connectionController.close();
+    super.dispose();
   }
 }

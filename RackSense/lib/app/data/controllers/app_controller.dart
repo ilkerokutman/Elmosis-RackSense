@@ -22,11 +22,16 @@ class AppController extends GetxController {
   }
 
   void _syncInitialValues() {
+    _isOnline.value = _connectivityService.isConnected;
     _isGpioReady.value = _gpioController.initialized;
     _acUnitList.assignAll(_mainController.acUnitList);
   }
 
   void _setupEverListeners() {
+    ever(_connectivityService.obs, (_) {
+      _isOnline.value = _connectivityService.isConnected;
+      update();
+    });
     ever(_gpioController.obs, (_) {
       _isGpioReady.value = _gpioController.initialized;
       update();
@@ -38,7 +43,8 @@ class AppController extends GetxController {
     });
   }
 
-  bool get isOnline => _connectivityService.isConnected;
+  final RxBool _isOnline = false.obs;
+  bool get isOnline => _isOnline.value;
 
   final RxBool _isGpioReady = false.obs;
   bool get isGpioReady => _isGpioReady.value;
