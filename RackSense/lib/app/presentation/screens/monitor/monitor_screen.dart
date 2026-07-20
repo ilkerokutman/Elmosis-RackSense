@@ -8,6 +8,7 @@ class MonitorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       selectedIndex: 1,
+      title: 'RackSense: Monitor',
       body: Center(child: Text('TODO: Monitor sayfasi')),
     );
   }

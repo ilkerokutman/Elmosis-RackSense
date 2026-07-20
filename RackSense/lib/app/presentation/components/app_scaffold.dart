@@ -7,9 +7,11 @@ class AppScaffold extends StatelessWidget {
     super.key,
     required this.selectedIndex,
     required this.body,
+    this.title,
   });
   final int selectedIndex;
   final Widget body;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +23,7 @@ class AppScaffold extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                AppBarWidget(),
+                AppBarWidget(title: title),
                 Divider(),
                 Expanded(child: body),
               ],

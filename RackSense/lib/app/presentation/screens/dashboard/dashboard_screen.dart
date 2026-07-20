@@ -12,6 +12,7 @@ class DashboardScreen extends StatelessWidget {
       builder: (ac) {
         return AppScaffold(
           selectedIndex: 0,
+          title: 'RackSense: Kontrol',
           body: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,

@@ -38,11 +38,11 @@ class NavRailWidget extends StatelessWidget {
       ],
       selectedIndex: selectedIndex,
       labelType: NavigationRailLabelType.all,
-      leading: Text(
-        'Rack\nSense',
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.titleLarge,
-      ), //CircleAvatar(child: Icon(Icons.ac_unit_outlined)),
+      // leading: Text(
+      //   'Rack\nSense',
+      //   textAlign: TextAlign.center,
+      //   style: Theme.of(context).textTheme.titleLarge,
+      // ), //CircleAvatar(child: Icon(Icons.ac_unit_outlined)),
       trailing: IconButton(
         onPressed: () async => await CU.exitAppDialog(context),
         icon: Icon(Icons.exit_to_app),

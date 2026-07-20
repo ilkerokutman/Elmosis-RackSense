@@ -8,6 +8,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       selectedIndex: 5,
+      title: 'Ayarlar',
       body: Center(child: Text('TODO: Ayarlar sayfasi')),
     );
   }

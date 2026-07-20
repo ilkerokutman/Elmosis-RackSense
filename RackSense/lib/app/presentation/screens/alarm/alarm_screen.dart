@@ -8,6 +8,7 @@ class AlarmScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       selectedIndex: 2,
+      title: 'Alarm',
       body: Center(child: Text('TODO:  Alarm sayfasi')),
     );
   }

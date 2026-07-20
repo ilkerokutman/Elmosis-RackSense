@@ -8,6 +8,7 @@ class CameraScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       selectedIndex: 3,
+      title: 'Kamera',
       body: Center(child: Text('TODO: Ayarlar sayfasi')),
     );
   }
