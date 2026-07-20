@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/routes/routes.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
+import 'package:rack_sense/app/presentation/components/nav_rail.dart';
 import 'package:window_manager/window_manager.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -57,10 +58,12 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: Center(
-            child: Text(
-              'isGpioReady: ${ac.isGpioReady}\nacUnitListCount: ${ac.acUnitList.length}',
-            ),
+          body: Row(
+            children: [
+              NavRailWidget(selectedIndex: 0),
+              VerticalDivider(),
+              Expanded(child: Center(child: Text('hello'))),
+            ],
           ),
         );
       },
