@@ -28,10 +28,11 @@ class AppController extends GetxController {
   }
 
   void _setupEverListeners() {
-    ever(_connectivityService.obs, (_) {
-      _isOnline.value = _connectivityService.isConnected;
+    ever(_connectivityService.isConnectedRx, (isConnected) {
+      _isOnline.value = isConnected;
       update();
     });
+
     ever(_gpioController.obs, (_) {
       _isGpioReady.value = _gpioController.initialized;
       update();

@@ -13,25 +13,10 @@ class AppBarWidget extends StatelessWidget {
         return AppBar(
           title: Text(title ?? 'RackSense'),
           actions: [
-            // IconButton(
-            //   onPressed: () {
-            //     Get.toNamed(Routes.sync);
-            //   },
-            //   icon: Icon(Icons.sync),
-            // ),
-            // IconButton(
-            //   onPressed: () {
-            //     Get.toNamed(Routes.settings);
-            //   },
-            //   icon: Icon(Icons.settings),
-            // ),
-            // IconButton(
-            //   onPressed: () async => await CU.exitAppDialog(context),
-            //   icon: Icon(Icons.close),
-            // ),
             ac.isOnline
                 ? Icon(Icons.lan_outlined, color: Colors.greenAccent)
                 : Icon(Icons.wifi_off, color: Colors.grey),
+            SizedBox(width: 12),
           ],
         );
       },

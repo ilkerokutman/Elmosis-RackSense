@@ -27,7 +27,7 @@ class ConnectivityService extends GetxController {
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> results) {
-    final wasConnected = _isConnected;
+    final wasConnected = _isConnected.value;
     _isConnected.value = results.any(
       (r) =>
           r == ConnectivityResult.wifi ||
