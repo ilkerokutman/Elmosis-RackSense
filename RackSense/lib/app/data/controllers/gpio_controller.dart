@@ -63,7 +63,7 @@ class GpioController extends GetxController {
 
       _buzzerPin = GPIO(buzzerPin, GPIOdirection.gpioDirOut);
 
-      _fanPin = GPIO(fanPin, GPIOdirection.gpioDirOut);
+      // _fanPin = GPIO(fanPin, GPIOdirection.gpioDirOut);
 
       for (final int pin in inputPins) {
         final gpio = GPIO(pin, GPIOdirection.gpioDirIn);
