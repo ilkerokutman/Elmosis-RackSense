@@ -32,6 +32,7 @@ class InitialBindings extends Bindings {
 
     print("Dependency Injection: Starting MAIN init");
     await Get.putAsync(() async => MainController(), permanent: true);
+    Get.find<MainController>().initializeAcUnitList();
     print("Dependency Injection: MAIN init completed");
 
     print("Dependency Injection: Starting APP init");

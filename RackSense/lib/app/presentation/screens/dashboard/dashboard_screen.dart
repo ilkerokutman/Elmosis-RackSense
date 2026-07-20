@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/routes/routes.dart';
-import 'package:rack_sense/app/data/controllers/gpio_controller.dart';
+import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:window_manager/window_manager.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -9,8 +9,8 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<GpioController>(
-      builder: (gc) {
+    return GetBuilder<AppController>(
+      builder: (ac) {
         return Scaffold(
           appBar: AppBar(
             actions: [
@@ -57,7 +57,11 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: Center(child: Text('Hello World! ${gc.initCompleted}')),
+          body: Center(
+            child: Text(
+              'isGpioReady: ${ac.isGpioReady}\nacUnitListCount: ${ac.acUnitList.length}',
+            ),
+          ),
         );
       },
     );
