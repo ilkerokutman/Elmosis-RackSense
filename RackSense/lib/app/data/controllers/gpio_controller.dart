@@ -53,15 +53,15 @@ class GpioController extends GetxController {
     print('GPIO: Starting init');
 
     try {
-      _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
+      // _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
 
-      _rclkPin = GPIO(rclkPin, GPIOdirection.gpioDirOut);
+      // _rclkPin = GPIO(rclkPin, GPIOdirection.gpioDirOut);
 
-      _txEnablePin = GPIO(txEnablePin, GPIOdirection.gpioDirOut);
+      // _txEnablePin = GPIO(txEnablePin, GPIOdirection.gpioDirOut);
 
-      _buzzerPin = GPIO(buzzerPin, GPIOdirection.gpioDirOut);
+      // _buzzerPin = GPIO(buzzerPin, GPIOdirection.gpioDirOut);
 
-      _fanPin = GPIO(fanPin, GPIOdirection.gpioDirOut);
+      // _fanPin = GPIO(fanPin, GPIOdirection.gpioDirOut);
 
       for (final int pin in inputPins) {
         final gpio = GPIO(pin, GPIOdirection.gpioDirIn);
