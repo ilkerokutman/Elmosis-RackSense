@@ -78,7 +78,10 @@ class CameraScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Text('Güvenlik'),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Güvenlik'),
+                        ),
 
                         ListView.builder(
                           itemBuilder: (context, index) => ListTile(
