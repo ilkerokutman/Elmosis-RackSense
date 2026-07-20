@@ -50,13 +50,10 @@ class CameraScreen extends StatelessWidget {
                                 children: [
                                   Icon(Icons.emergency_recording_outlined),
                                   Text(
-                                    'Kamera bağlantısı yok',
+                                    'Kamera bağlantısı algılanamadı',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
-                                  ),
-                                  Text(
-                                    'Veri adaptöründen kamera adresi verilebilir.',
                                   ),
                                 ],
                               ),
