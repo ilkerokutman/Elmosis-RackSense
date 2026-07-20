@@ -53,7 +53,7 @@ class GpioController extends GetxController {
     print('GPIO: Starting init');
 
     try {
-      // _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
+      _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
 
       // _rclkPin = GPIO(rclkPin, GPIOdirection.gpioDirOut);
 
