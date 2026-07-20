@@ -55,7 +55,9 @@ class GpioController extends GetxController {
     try {
       _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
 
-      // _rclkPin = GPIO(rclkPin, GPIOdirection.gpioDirOut);
+      _srclkPin = GPIO(srclkPin, GPIOdirection.gpioDirOut);
+
+      _rclkPin = GPIO(rclkPin, GPIOdirection.gpioDirOut);
 
       // _txEnablePin = GPIO(txEnablePin, GPIOdirection.gpioDirOut);
 
