@@ -31,17 +31,17 @@ class MonitorScreen extends StatelessWidget {
                           subtitle: Text('Saat | Gün | Ay'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
-                            spacing: 4,
+                            spacing: 8,
                             children: [
                               Container(
-                                width: 40,
-                                height: 3,
+                                width: 20,
+                                height: 4,
                                 color: Colors.blue,
                               ),
                               Text('Ortam'),
                               Container(
-                                width: 40,
-                                height: 3,
+                                width: 20,
+                                height: 4,
                                 color: Colors.orange,
                               ),
                               Text('Üfleme '),

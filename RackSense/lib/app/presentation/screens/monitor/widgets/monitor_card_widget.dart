@@ -14,10 +14,11 @@ class MonitorCardWidget extends StatelessWidget {
     return SizedBox(
       width: 100,
       child: AspectRatio(
-        aspectRatio: 1,
+        aspectRatio: 4 / 3,
         child: Card(
+          color: Theme.of(context).colorScheme.primaryContainer,
           child: Padding(
-            padding: EdgeInsetsGeometry.all(8),
+            padding: EdgeInsetsGeometry.all(6),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -33,7 +34,7 @@ class MonitorCardWidget extends StatelessWidget {
                 ),
                 Text(
                   value,
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
                 ),
               ],
             ),
