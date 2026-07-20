@@ -92,9 +92,12 @@ class MonitorScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [Text('Son veri'), Text('08:14:26')],
+                        ListTile(
+                          title: Text(
+                            'Son veri',
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                          trailing: Text('08:14:26'),
                         ),
                       ],
                     ),

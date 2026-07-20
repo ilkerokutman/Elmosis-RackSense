@@ -22,14 +22,16 @@ class MonitorCardWidget extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 12,
+              spacing: 8,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Opacity(
                   opacity: 0.7,
                   child: Text(
                     label,
-                    style: Theme.of(context).textTheme.labelMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
                 Text(
