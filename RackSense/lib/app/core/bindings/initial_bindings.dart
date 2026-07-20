@@ -16,6 +16,8 @@ class InitialBindings extends Bindings {
     await Get.putAsync(() async => connectivityService, permanent: true);
 
     await Get.putAsync(() async => GpioController(), permanent: true);
+    await Get.find<GpioController>().initialize();
+
     await Get.putAsync(() async => SyncController(), permanent: true);
     await Get.putAsync(() async => BusinessController(), permanent: true);
 

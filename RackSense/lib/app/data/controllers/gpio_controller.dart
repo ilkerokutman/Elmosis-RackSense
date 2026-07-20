@@ -9,11 +9,11 @@ import 'package:rack_sense/app/core/utils/common_utils.dart';
 
 class GpioController extends GetxController {
   //
-  @override
-  void onInit() {
-    super.onInit();
-    initialize();
-  }
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   //initialize();
+  // }
 
   final List<bool> _outputStates = List.filled(8, false);
   List<bool> get outputStates => List.unmodifiable(_outputStates);
