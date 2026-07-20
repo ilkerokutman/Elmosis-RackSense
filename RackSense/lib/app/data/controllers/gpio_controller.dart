@@ -73,7 +73,7 @@ class GpioController extends GetxController {
         _buttonPins[pin] = gpio;
       }
 
-      _spiAdc = SPI(0, 0, SPImode.mode0, 1000000);
+      // _spiAdc = SPI(0, 0, SPImode.mode0, 1000000);
 
       _initCompleted.value = true;
       update();

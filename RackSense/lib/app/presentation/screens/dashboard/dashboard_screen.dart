@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/routes/routes.dart';
 import 'package:rack_sense/app/data/controllers/gpio_controller.dart';
-import 'package:rack_sense/app/data/controllers/main_controller.dart';
 import 'package:window_manager/window_manager.dart';
 
 class DashboardScreen extends StatelessWidget {
