@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rack_sense/app/core/utils/common_utils.dart';
 
 class NavRailWidget extends StatelessWidget {
   const NavRailWidget({super.key, required this.selectedIndex});
@@ -35,6 +36,12 @@ class NavRailWidget extends StatelessWidget {
         ),
       ],
       selectedIndex: selectedIndex,
+      labelType: NavigationRailLabelType.all,
+      leading: CircleAvatar(child: Icon(Icons.ac_unit_outlined)),
+      trailing: IconButton(
+        onPressed: () async => await CU.exitAppDialog(context),
+        icon: Icon(Icons.exit_to_app),
+      ),
     );
   }
 }
