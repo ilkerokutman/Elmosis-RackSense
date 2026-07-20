@@ -59,7 +59,7 @@ class GpioController extends GetxController {
 
       _rclkPin = GPIO(rclkPin, GPIOdirection.gpioDirOut);
 
-      // _txEnablePin = GPIO(txEnablePin, GPIOdirection.gpioDirOut);
+      _txEnablePin = GPIO(txEnablePin, GPIOdirection.gpioDirOut);
 
       // _buzzerPin = GPIO(buzzerPin, GPIOdirection.gpioDirOut);
 
