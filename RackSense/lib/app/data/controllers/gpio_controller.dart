@@ -1,3 +1,4 @@
+/*
 // ignore_for_file: avoid_print
 
 import 'dart:async';
@@ -31,6 +32,20 @@ class GpioController extends GetxController {
   GPIO? _buzzerPin;
   GPIO? _fanPin;
   SPI? _spiAdc;
+  GPIO? uartModeTx;
+  GPIO? btn1;
+  GPIO? btn2;
+  GPIO? btn3;
+  GPIO? btn4;
+  GPIO? buzzer;
+  GPIO? in1;
+  GPIO? in2;
+  GPIO? in3;
+  GPIO? in4;
+  GPIO? in5;
+  GPIO? in6;
+  GPIO? in7;
+  GPIO? in8;
 
   final Map<int, GPIO> _inputPins = {};
   final Map<int, GPIO> _buttonPins = {};
@@ -81,6 +96,21 @@ class GpioController extends GetxController {
     print('GPIO: Starting init');
 
     try {
+      uartModeTx = GPIO(4, GPIOdirection.gpioDirOut);
+
+      btn1 = GPIO(17, GPIOdirection.gpioDirIn);
+      btn2 = GPIO(18, GPIOdirection.gpioDirIn);
+      btn3 = GPIO(27, GPIOdirection.gpioDirIn);
+      btn4 = GPIO(22, GPIOdirection.gpioDirIn);
+      in1 = GPIO(5, GPIOdirection.gpioDirIn);
+      in2 = GPIO(6, GPIOdirection.gpioDirIn);
+      in3 = GPIO(12, GPIOdirection.gpioDirIn);
+      in4 = GPIO(13, GPIOdirection.gpioDirIn);
+      in5 = GPIO(19, GPIOdirection.gpioDirIn);
+      in6 = GPIO(16, GPIOdirection.gpioDirIn);
+      in7 = GPIO(26, GPIOdirection.gpioDirIn);
+      in8 = GPIO(20, GPIOdirection.gpioDirIn);
+
       _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
 
       _srclkPin = GPIO(srclkPin, GPIOdirection.gpioDirOut);
@@ -93,15 +123,15 @@ class GpioController extends GetxController {
 
       // _fanPin = GPIO(fanPin, GPIOdirection.gpioDirOut);
 
-      for (final int pin in inputPins) {
-        final gpio = GPIO(pin, GPIOdirection.gpioDirIn);
-        _inputPins[pin] = gpio;
-      }
+      // for (final int pin in inputPins) {
+      //   final gpio = GPIO(pin, GPIOdirection.gpioDirIn);
+      //   _inputPins[pin] = gpio;
+      // }
 
-      for (final int pin in buttonPins) {
-        final gpio = GPIO(pin, GPIOdirection.gpioDirIn);
-        _buttonPins[pin] = gpio;
-      }
+      // for (final int pin in buttonPins) {
+      //   final gpio = GPIO(pin, GPIOdirection.gpioDirIn);
+      //   _buttonPins[pin] = gpio;
+      // }
 
       _spiAdc = SPI(0, 0, SPImode.mode0, 1000000);
 
@@ -169,6 +199,7 @@ class GpioController extends GetxController {
 
   Future<void> _sendOutputPackage() async {
     if (!Platform.isLinux) return;
+
     for (int i = 0; i < 8; i++) {
       _writePin(_serPin, _outputStates[i]);
       CU.microWait();
@@ -341,6 +372,66 @@ class GpioController extends GetxController {
       _pinStates[index].value = ps.value;
       update();
     }
+  }
+
+  bool getPinState({
+    required int device,
+    required int number,
+    required PinType type,
+  }) {
+    return pinStates
+        .firstWhere(
+          (e) => e.device == device && e.number == number && e.type == type,
+        )
+        .status;
+  }
+
+  double? getPinValue({
+    required int device,
+    required int number,
+    required PinType type,
+  }) {
+    return pinStates
+        .firstWhere(
+          (e) => e.device == device && e.number == number && e.type == type,
+        )
+        .value;
+  }
+
+  GPIO? getInputPinByNumber(int a) {
+    switch (a) {
+      case 0x01:
+        return in1;
+      case 0x02:
+        return in2;
+      case 0x03:
+        return in3;
+      case 0x04:
+        return in4;
+      case 0x05:
+        return in5;
+      case 0x06:
+        return in6;
+      case 0x07:
+        return in7;
+      case 0x08:
+        return in8;
+    }
+    return null;
+  }
+
+  GPIO? getButtonPinByNumber(int a) {
+    switch (a) {
+      case 0x01:
+        return btn1;
+      case 0x02:
+        return btn2;
+      case 0x03:
+        return btn3;
+      case 0x04:
+        return btn4;
+    }
+    return null;
   }
 
   // MARK: Serial
@@ -566,3 +657,4 @@ class GpioController extends GetxController {
     super.dispose();
   }
 }
+*/

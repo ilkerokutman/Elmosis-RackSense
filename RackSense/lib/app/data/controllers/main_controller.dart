@@ -1,6 +1,9 @@
+/*
+import 'package:dart_periphery/dart_periphery.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/gpio_controller.dart';
 import 'package:rack_sense/app/data/models/ac_unit.dart';
+import 'package:rack_sense/app/data/models/pin_state.dart';
 import 'package:rack_sense/app/data/services/serial_service.dart';
 
 class MainController extends GetxController {
@@ -47,9 +50,12 @@ class MainController extends GetxController {
   RxBool get serviceDoorOpenRx => _serviceDoorOpen;
   bool get serviceDoorOpen => _serviceDoorOpen.value;
 
+  
+
   void sendTestSignal() {
     Get.find<GpioController>().addToSerialMessageStack(
       SerialMessage(device: 0x01, command: 0x64),
     );
   }
 }
+*/

@@ -83,22 +83,24 @@ class CameraScreen extends StatelessWidget {
                         ListView.builder(
                           itemBuilder: (context, index) => ListTile(
                             title: Text(
-                              app.securitySwitchList[index].title,
+                             'NA',
+                             // app.securitySwitchList[index].title,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                             trailing:
-                                app.securitySwitchList[index].status == true
-                                ? Icon(
-                                    Icons.warning_rounded,
-                                    color: Colors.redAccent,
-                                  )
-                                : Icon(
+                                // app.securitySwitchList[index].status == true
+                                // ? Icon(
+                                //     Icons.warning_rounded,
+                                //     color: Colors.redAccent,
+                                //   )
+                                // :
+                                 Icon(
                                     Icons.check_circle,
                                     color: Colors.lightGreen,
                                   ),
                           ),
                           shrinkWrap: true,
-                          itemCount: app.securitySwitchList.length,
+                          itemCount:0// app.securitySwitchList.length,
                         ),
                       ],
                     ),

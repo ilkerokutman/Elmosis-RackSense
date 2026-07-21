@@ -17,45 +17,7 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               spacing: 8,
-              children: [
-                Text('Dashboard'),
-                Text('gpio: ${ac.isGpioReady}'),
-                Text('acunit: ${ac.acUnitList.length}'),
-                SwitchListTile(
-                  title: Text('Allow serial loop'),
-                  value: ac.allowSerialLoop,
-                  onChanged: (val) {
-                    ac.toggleSerialLoop();
-                  },
-                ),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: ac.sendSerialTestSignal,
-                      child: Text('serial test'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        ac.serialCommand(command: 0x65);
-                      },
-                      child: Text('reboot d'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        ac.serialCommand(command: 0x67);
-                      },
-                      child: Text('on d'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        ac.serialCommand(command: 0x68);
-                      },
-                      child: Text('off d'),
-                    ),
-                    ElevatedButton(onPressed: ac.buzzBeep, child: Text('beep')),
-                  ],
-                ),
-              ],
+              children: [Text('GPIO'), Divider(), Text('Serial'), Divider()],
             ),
           ),
         );
