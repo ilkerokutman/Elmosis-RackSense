@@ -79,7 +79,7 @@ class SerialService {
 
   Future<void> sendMessage(
     SerialMessage message, {
-    required bool Function(bool) setTxEnable,
+    required void Function(bool) setTxEnable,
   }) async {
     if (!_initialized || _serialPort == null) return;
 

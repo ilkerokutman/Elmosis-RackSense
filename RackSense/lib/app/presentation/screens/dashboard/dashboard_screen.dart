@@ -21,6 +21,10 @@ class DashboardScreen extends StatelessWidget {
                 Text('Dashboard'),
                 Text('gpio: ${ac.isGpioReady}'),
                 Text('acunit: ${ac.acUnitList.length}'),
+                ElevatedButton(
+                  onPressed: ac.sendSerialTestSignal,
+                  child: Text('serial test'),
+                ),
               ],
             ),
           ),

@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
+import 'package:rack_sense/app/data/controllers/gpio_controller.dart';
 import 'package:rack_sense/app/data/models/ac_unit.dart';
+import 'package:rack_sense/app/data/services/serial_service.dart';
 
 class MainController extends GetxController {
   //
@@ -11,13 +13,13 @@ class MainController extends GetxController {
   void initializeAcUnitList() {
     _acUnitList.assignAll([
       AcUnit(
-        id: 1,
+        id: 0x01,
         roomTemperature: 0,
         blowTemperature: 0,
         targetTemperature: 0,
       ),
       AcUnit(
-        id: 2,
+        id: 0x02,
         roomTemperature: 0,
         blowTemperature: 0,
         targetTemperature: 0,
@@ -44,4 +46,10 @@ class MainController extends GetxController {
   final RxBool _serviceDoorOpen = false.obs;
   RxBool get serviceDoorOpenRx => _serviceDoorOpen;
   bool get serviceDoorOpen => _serviceDoorOpen.value;
+
+  Future<void> sendTestSignal() async {
+    await Get.find<GpioController>().sendSerialMessage(
+      SerialMessage(device: 0x01, command: 0x64),
+    );
+  }
 }

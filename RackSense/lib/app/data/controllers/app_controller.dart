@@ -85,4 +85,8 @@ class AppController extends GetxController {
       status: serviceDoorOpen,
     ),
   ];
+
+  Future<void> sendSerialTestSignal() async {
+    await _mainController.sendTestSignal();
+  }
 }

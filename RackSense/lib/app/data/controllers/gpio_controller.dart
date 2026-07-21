@@ -31,6 +31,7 @@ class GpioController extends GetxController {
   GPIO? _buzzerPin;
   GPIO? _fanPin;
   SPI? _spiAdc;
+  GPIO? uartModeTx;
 
   final Map<int, GPIO> _inputPins = {};
   final Map<int, GPIO> _buttonPins = {};
@@ -51,6 +52,27 @@ class GpioController extends GetxController {
   int get inputPinCount => _inputPins.length;
   int get buttonPinCount => _buttonPins.length;
   bool get spiInitialized => _spiAdc != null;
+
+  final RxBool _pinUartModeTxState = false.obs;
+  bool get pinUartModeTxState => _pinUartModeTxState.value;
+
+  final RxBool _spiMisoState = false.obs;
+  bool get spiMisoState => _spiMisoState.value;
+
+  final RxBool _outOEState = false.obs;
+  bool get outOEState => _outOEState.value;
+
+  final RxBool _outSRCLKState = false.obs;
+  bool get outSRCLKState => _outSRCLKState.value;
+
+  final RxBool _outRCLKState = false.obs;
+  bool get outRCLKState => _outRCLKState.value;
+
+  final RxBool _outSERState = false.obs;
+  bool get outSERState => _outSERState.value;
+
+  final RxBool _buzzerState = false.obs;
+  bool get buzzerState => _buzzerState.value;
 
   Future<void> initialize() async {
     if (!Platform.isLinux) {
@@ -328,6 +350,11 @@ class GpioController extends GetxController {
   final RxList<List<int>> _receivedData = <List<int>>[].obs;
   List<List<int>> get receivedData => _receivedData;
 
+  void _setTxEnable(bool value) {
+    uartModeTx?.write(value);
+    _pinUartModeTxState.value = value;
+  }
+
   void _onSerialMessageReceived(Uint8List data) {
     List<int> rawData = data.toList();
 
@@ -417,6 +444,23 @@ class GpioController extends GetxController {
         print('read all values');
         break;
     }
+  }
+
+  Future<void> sendSerialMessage(SerialMessage m) async {
+    final bytes = m.toBytesWithCrc();
+    final hexStr = bytes
+        .map((b) => b.toRadixString(16).padLeft(2, '0').toUpperCase())
+        .join(' ');
+    print('>>>>> $hexStr');
+
+    _currentSerialMessage.value = m;
+    update();
+
+    await _serialService.sendMessage(m, setTxEnable: _setTxEnable);
+
+    _sentData.add(bytes);
+    if (_sentData.length > 50) _sentData.removeAt(0);
+    update();
   }
 
   @override
