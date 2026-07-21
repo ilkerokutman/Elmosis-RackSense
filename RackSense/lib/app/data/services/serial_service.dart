@@ -58,6 +58,7 @@ class SerialService {
       _messageSubscription?.cancel();
       _messageSubscription = _serialPortReader!.stream.listen(
         (Uint8List data) {
+          print('message received ${data.length} bytes');
           _handler.onDataReceived(data);
         },
         onError: (error) {
@@ -91,8 +92,8 @@ class SerialService {
 
     try {
       _serialPort!.write(bytes);
-    } catch (_) {
-      // write error
+    } catch (e) {
+      print('serial send error: ${e.toString()}');
     }
 
     await CU.wait(10);
