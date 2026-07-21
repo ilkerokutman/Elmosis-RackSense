@@ -25,6 +25,7 @@ class AppController extends GetxController {
   void _syncInitialValues() {
     _isOnline.value = _connectivityService.isConnected;
     _isGpioReady.value = _gpioController.initialized;
+    _allowSerialLoop.value = _gpioController.allowSerialLoopRx.value;
     _acUnitList.assignAll(_mainController.acUnitList);
   }
 
@@ -36,6 +37,7 @@ class AppController extends GetxController {
 
     ever(_gpioController.obs, (_) {
       _isGpioReady.value = _gpioController.initialized;
+      _allowSerialLoop.value = _gpioController.allowSerialLoopRx.value;
       update();
     });
 
@@ -74,6 +76,9 @@ class AppController extends GetxController {
   final RxBool _serviceDoorOpen = false.obs;
   bool get serviceDoorOpen => _serviceDoorOpen.value;
 
+  final RxBool _allowSerialLoop = false.obs;
+  bool get allowSerialLoop => _allowSerialLoop.value;
+
   List<SecuritySwitch> get securitySwitchList => [
     SecuritySwitch(id: 'smoke', title: 'Duman Sensörü', status: smokeDetection),
     SecuritySwitch(id: 'su', title: 'Su Kaçağı', status: waterLeak),
@@ -86,7 +91,13 @@ class AppController extends GetxController {
     ),
   ];
 
-  Future<void> sendSerialTestSignal() async {
-    await _mainController.sendTestSignal();
+  void toggleSerialLoop() {
+    if (allowSerialLoop) {
+      _gpioController.turnOffSerialLoop();
+    } else {
+      _gpioController.turnOnSerialLoop();
+    }
   }
+
+  void sendSerialTestSignal() => _mainController.sendTestSignal();
 }

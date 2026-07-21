@@ -47,8 +47,8 @@ class MainController extends GetxController {
   RxBool get serviceDoorOpenRx => _serviceDoorOpen;
   bool get serviceDoorOpen => _serviceDoorOpen.value;
 
-  Future<void> sendTestSignal() async {
-    await Get.find<GpioController>().sendSerialMessage(
+  void sendTestSignal() {
+    Get.find<GpioController>().addToSerialMessageStack(
       SerialMessage(device: 0x01, command: 0x64),
     );
   }

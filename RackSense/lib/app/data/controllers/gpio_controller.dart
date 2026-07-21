@@ -124,6 +124,20 @@ class GpioController extends GetxController {
     }
   }
 
+  void turnOnSerialLoop() {
+    _allowSerialLoop.value = true;
+    update();
+    print('Serial loop enabled');
+    runSerialLoop();
+  }
+
+  void turnOffSerialLoop() {
+    _allowSerialLoop.value = false;
+    _processingSerialLoop.value = false;
+    update();
+    print('Serial loop disabled');
+  }
+
   void _writePin(GPIO? pin, bool value) {
     if (pin == null) return;
     try {
@@ -333,6 +347,7 @@ class GpioController extends GetxController {
   // MARK: Serial
 
   final RxBool _allowSerialLoop = false.obs;
+  RxBool get allowSerialLoopRx => _allowSerialLoop;
   bool get allowSerialLoop => _allowSerialLoop.value;
 
   final RxBool _processingSerialLoop = false.obs;
@@ -446,6 +461,11 @@ class GpioController extends GetxController {
     }
   }
 
+  void addToSerialMessageStack(SerialMessage m) {
+    _messageStack.add(m);
+    update();
+  }
+
   Future<void> sendSerialMessage(SerialMessage m) async {
     final bytes = m.toBytesWithCrc();
     final hexStr = bytes
@@ -461,6 +481,70 @@ class GpioController extends GetxController {
     _sentData.add(bytes);
     if (_sentData.length > 50) _sentData.removeAt(0);
     update();
+  }
+
+  Future<void> sendSerialMessageFromStack() async {
+    if (_messageStack.isNotEmpty) {
+      print('taking message from stack (${_messageStack.length}) remaining');
+      SerialMessage m = _messageStack.removeAt(0);
+      await sendSerialMessage(m);
+    }
+  }
+
+  Future<void> runSerialLoop() async {
+    if (!allowSerialLoop) return;
+
+    _processingSerialLoop.value = true;
+    update();
+
+    // poll
+    for (final deviceId in [0x01, 0x02]) {
+      // read
+      await sendSerialMessage(SerialMessage(device: deviceId, command: 0xD2));
+      await waitForSerialResponse();
+    }
+
+    while (messageStack.isNotEmpty) {
+      await sendSerialMessageFromStack();
+      await waitForSerialResponse();
+    }
+
+    _processingSerialLoop.value = false;
+    update();
+
+    await CU.wait(kSerialLoopDelay);
+    if (allowSerialLoop) {
+      runSerialLoop();
+    }
+  }
+
+  Future<void> waitForSerialResponse() async {
+    if (currentSerialMessage == null) {
+      return;
+    }
+
+    if (currentSerialMessage!.command == 0x65) {
+      // ignore restart commands response
+      await CU.wait(kSerialAcknowledgementDelay);
+      _currentSerialMessage.value = null;
+      update();
+      return;
+    }
+
+    int timeoutMillis = 0;
+    const maxTimeout = 1000;
+
+    while (currentSerialMessage != null &&
+        timeoutMillis < kSerialAcknowledgementDelay) {
+      timeoutMillis++;
+      await CU.wait(1);
+      if (timeoutMillis >= maxTimeout) {
+        print('Error: serial response timeout');
+        _currentSerialMessage.value = null;
+        update();
+        return;
+      }
+    }
   }
 
   @override
