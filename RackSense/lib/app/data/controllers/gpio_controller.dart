@@ -31,7 +31,6 @@ class GpioController extends GetxController {
   GPIO? _buzzerPin;
   GPIO? _fanPin;
   SPI? _spiAdc;
-  GPIO? uartModeTx;
 
   final Map<int, GPIO> _inputPins = {};
   final Map<int, GPIO> _buttonPins = {};
@@ -80,12 +79,6 @@ class GpioController extends GetxController {
     }
 
     print('GPIO: Starting init');
-
-    try {
-      uartModeTx = GPIO(txEnablePin, GPIOdirection.gpioDirOut);
-    } catch (e) {
-      print('txpin error: ${e.toString()}');
-    }
 
     try {
       _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
@@ -372,8 +365,9 @@ class GpioController extends GetxController {
   List<List<int>> get receivedData => _receivedData;
 
   void _setTxEnable(bool value) {
-    uartModeTx?.write(value);
+    _txEnablePin?.write(value);
     _pinUartModeTxState.value = value;
+    update();
   }
 
   void _onSerialMessageReceived(Uint8List data) {
