@@ -1,19 +1,25 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:dart_periphery/dart_periphery.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/utils/common_utils.dart';
+import 'package:rack_sense/app/data/models/pin_state.dart';
+import 'package:rack_sense/app/data/services/serial_service.dart';
 
 class GpioController extends GetxController {
+  late final SerialService _serialService;
+  StreamSubscription<Uint8List>? _serialMessageSubscription;
   //
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  //   //initialize();
-  // }
+  @override
+  void onInit() {
+    super.onInit();
+    _serialService = Get.find<SerialService>();
+  }
 
   final List<bool> _outputStates = List.filled(8, false);
   List<bool> get outputStates => List.unmodifiable(_outputStates);
@@ -31,6 +37,7 @@ class GpioController extends GetxController {
 
   static const int serPin = 23;
   static const int srclkPin = 24;
+
   static const int rclkPin = 25;
   static const int txEnablePin = 21;
   static const int buzzerPin = 0;
@@ -78,6 +85,14 @@ class GpioController extends GetxController {
       _spiAdc = SPI(0, 0, SPImode.mode0, 1000000);
 
       _initCompleted.value = true;
+
+      _serialMessageSubscription?.cancel();
+      _serialMessageSubscription = _serialService.onMessage.listen((
+        Uint8List data,
+      ) {
+        _onSerialMessageReceived(data);
+      });
+
       update();
       print(
         'GPIO: Initialization complete. Inputs: ${_inputPins.length}, Buttons: ${_buttonPins.length}, SPI: ${_spiAdc != null}',
@@ -267,6 +282,143 @@ class GpioController extends GetxController {
     return math.log(x);
   }
 
+  // MARK: PinStates
+
+  final RxList<PinState> _pinStates = <PinState>[].obs;
+  List<PinState> get pinStates => _pinStates;
+  List<PinState> getPinStates({int? device, int? number, PinType? type}) =>
+      pinStates
+          .where(
+            (e) =>
+                (device == null || e.device == device) &&
+                (number == null || e.number == number) &&
+                (type == null || e.type == type),
+          )
+          .toList();
+
+  void updatePinState(PinState ps) {
+    int index = pinStates.indexWhere(
+      (p) =>
+          p.device == ps.device && p.number == ps.number && p.type == ps.type,
+    );
+    if (index != -1) {
+      _pinStates[index].status = ps.status;
+      _pinStates[index].value = ps.value;
+      update();
+    }
+  }
+
+  // MARK: Serial
+
+  final RxBool _allowSerialLoop = false.obs;
+  bool get allowSerialLoop => _allowSerialLoop.value;
+
+  final RxBool _processingSerialLoop = false.obs;
+  bool get processingSerialLoop => _processingSerialLoop.value;
+
+  final RxList<SerialMessage> _messageStack = <SerialMessage>[].obs;
+  List<SerialMessage> get messageStack => _messageStack;
+
+  final Rxn<SerialMessage> _currentSerialMessage = Rxn<SerialMessage>();
+  SerialMessage? get currentSerialMessage => _currentSerialMessage.value;
+
+  final RxList<List<int>> _sentData = <List<int>>[].obs;
+  List<List<int>> get sentData => _sentData;
+
+  final RxList<List<int>> _receivedData = <List<int>>[].obs;
+  List<List<int>> get receivedData => _receivedData;
+
+  void _onSerialMessageReceived(Uint8List data) {
+    List<int> rawData = data.toList();
+
+    // skip CRC check
+
+    _receivedData.add(rawData);
+    if (_receivedData.length > 50) _receivedData.removeAt(0);
+    update();
+
+    _parseSerialMessage(rawData);
+  }
+
+  void _parseSerialMessage(List<int> data) {
+    final deviceId = data[1];
+    final command = data[2];
+    final index = data[3];
+    final args = data[4];
+
+    print(
+      '<<<< D:0x${deviceId.toRadixString(16).padLeft(2, '0')} '
+      'C:0x${command.toRadixString(16).padLeft(2, '0')} '
+      'I:0x${index.toRadixString(16).padLeft(2, '0')} '
+      'A:0x${args.toRadixString(16).padLeft(2, '0')}',
+    );
+
+    // clear current message if this is the response
+    if (currentSerialMessage != null &&
+        currentSerialMessage!.command == command &&
+        currentSerialMessage!.device == deviceId) {
+      _currentSerialMessage.value = null;
+      update();
+    }
+
+    switch (command) {
+      case 0x64: // test signal
+        print('Test signal OK');
+        break;
+      case 0x65: // restart device
+        print('device restart');
+        break;
+      case 0x66: // modify set value
+        print('modify set value');
+        break;
+      case 0x67: // turn device on
+        print('turn device on');
+        break;
+      case 0x68: // turn device off
+        print('turn device off');
+        break;
+      case 0xCA: // read set value
+        print('set degeri oku');
+        break;
+      case 0xCB: // NTC0 read
+        print('ntc0 oku');
+        break;
+      case 0xCC: // NTC1 read
+        print('ntc1 oku');
+        break;
+      case 0xCD: // NTC2 read
+        print('ntc2 oku');
+        break;
+      case 0xCE: // NTC3 read
+        print('ntc3 oku');
+        break;
+      case 0xCF: // read outputs
+        print('read outputs');
+        break;
+      case 0xD0: // read inputs
+        print('read inputs');
+        final states = SerialUtils.parseStates(args);
+        for (int i = 0; i < 6; i++) {
+          final pinState = getPinStates(
+            device: deviceId,
+            number: i + 1,
+            type: PinType.digitalInput,
+          ).firstOrNull;
+          if (pinState != null) {
+            pinState.status = states[i];
+            updatePinState(pinState);
+          }
+        }
+        break;
+      case 0xD1: // read fan level
+        print('read fan level');
+        break;
+      case 0xD2: // read all values
+        print('read all values');
+        break;
+    }
+  }
+
   @override
   void dispose() {
     _serPin?.dispose();
@@ -282,6 +434,7 @@ class GpioController extends GetxController {
     for (final gpio in _buttonPins.values) {
       gpio.dispose();
     }
+    _serialMessageSubscription?.cancel();
     super.dispose();
   }
 }
