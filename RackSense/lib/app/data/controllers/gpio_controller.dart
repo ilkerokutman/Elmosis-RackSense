@@ -82,8 +82,12 @@ class GpioController extends GetxController {
     print('GPIO: Starting init');
 
     try {
-      uartModeTx = GPIO(21, GPIOdirection.gpioDirOut);
+      uartModeTx = GPIO(txEnablePin, GPIOdirection.gpioDirOut);
+    } catch (e) {
+      print('txpin error: ${e.toString()}');
+    }
 
+    try {
       _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
 
       _srclkPin = GPIO(srclkPin, GPIOdirection.gpioDirOut);
