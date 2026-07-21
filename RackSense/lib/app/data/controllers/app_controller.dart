@@ -635,11 +635,11 @@ class AppController extends GetxController {
     // Poll all extension devices for inputs and outputs
     for (final deviceId in deviceIds.where((e) => e != mainboardId)) {
       // Read outputs
-      await sendSerialMessage(SerialMessage(device: deviceId, command: 0x69));
-      await waitForSerialResponse();
+      // await sendSerialMessage(SerialMessage(device: deviceId, command: 0x69));
+      // await waitForSerialResponse();
 
       // Read inputs
-      await sendSerialMessage(SerialMessage(device: deviceId, command: 0x67));
+      await sendSerialMessage(SerialMessage(device: deviceId, command: 0xD2));
       await waitForSerialResponse();
     }
 
