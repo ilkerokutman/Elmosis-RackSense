@@ -82,7 +82,7 @@ class GpioController extends GetxController {
     print('GPIO: Starting init');
 
     try {
-      uartModeTx = GPIO(4, GPIOdirection.gpioDirOut);
+      uartModeTx = GPIO(21, GPIOdirection.gpioDirOut);
 
       _serPin = GPIO(serPin, GPIOdirection.gpioDirOut);
 
