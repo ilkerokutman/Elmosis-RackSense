@@ -32,6 +32,7 @@ class DashboardScreen extends StatelessWidget {
                   onPressed: ac.sendSerialTestSignal,
                   child: Text('serial test'),
                 ),
+                ElevatedButton(onPressed: ac.buzzBeep, child: Text('beep')),
               ],
             ),
           ),

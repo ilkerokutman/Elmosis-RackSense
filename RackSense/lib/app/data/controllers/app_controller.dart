@@ -92,7 +92,7 @@ class AppController extends GetxController {
   ];
 
   void toggleSerialLoop() {
-    if (allowSerialLoop) {
+    if (_gpioController.allowSerialLoop) {
       _gpioController.turnOffSerialLoop();
     } else {
       _gpioController.turnOnSerialLoop();
@@ -100,4 +100,8 @@ class AppController extends GetxController {
   }
 
   void sendSerialTestSignal() => _mainController.sendTestSignal();
+
+  Future<void> buzzBeep() async {
+    await _gpioController.buzzerBeep();
+  }
 }
