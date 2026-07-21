@@ -28,8 +28,14 @@ class SerialService {
   Stream<Uint8List> get onMessage => _handler.onMessage;
 
   Future<bool> initialize() async {
-    if (!isLinux) return false;
-    if (_initialized) return true;
+    if (!isLinux) {
+      print("Serial Service Error: NOT LINUX");
+      return false;
+    }
+    if (_initialized) {
+      print('Serial Service Error: Already initialized');
+      return true;
+    }
 
     try {
       _serialPort = SerialPort(kSserialPort);
@@ -61,6 +67,7 @@ class SerialService {
       _initialized = true;
       return true;
     } catch (e) {
+      print('Serial Service Error: ${e.toString()}');
       _initialized = false;
       return false;
     }
