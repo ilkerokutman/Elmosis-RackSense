@@ -4,6 +4,7 @@ import 'package:rack_sense/app/data/controllers/main_controller.dart';
 import 'package:rack_sense/app/data/models/ac_unit.dart';
 import 'package:rack_sense/app/data/models/security_switch.dart';
 import 'package:rack_sense/app/data/services/connectivity_service.dart';
+import 'package:rack_sense/app/data/services/serial_service.dart';
 
 class AppController extends GetxController {
   late final ConnectivityService _connectivityService;
@@ -100,6 +101,12 @@ class AppController extends GetxController {
   }
 
   void sendSerialTestSignal() => _mainController.sendTestSignal();
+
+  void rebootDevice({int? deviceId}) {
+    _gpioController.addToSerialMessageStack(
+      SerialMessage(device: deviceId ?? 0x01, command: 0x065),
+    );
+  }
 
   Future<void> buzzBeep() async {
     await _gpioController.buzzerBeep();

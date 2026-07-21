@@ -28,11 +28,19 @@ class DashboardScreen extends StatelessWidget {
                     ac.toggleSerialLoop();
                   },
                 ),
-                ElevatedButton(
-                  onPressed: ac.sendSerialTestSignal,
-                  child: Text('serial test'),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: ac.sendSerialTestSignal,
+                      child: Text('serial test'),
+                    ),
+                    ElevatedButton(
+                      onPressed: ac.rebootDevice,
+                      child: Text('reboot d'),
+                    ),
+                    ElevatedButton(onPressed: ac.buzzBeep, child: Text('beep')),
+                  ],
                 ),
-                ElevatedButton(onPressed: ac.buzzBeep, child: Text('beep')),
               ],
             ),
           ),
