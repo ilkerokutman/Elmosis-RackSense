@@ -102,9 +102,9 @@ class AppController extends GetxController {
 
   void sendSerialTestSignal() => _mainController.sendTestSignal();
 
-  void rebootDevice({int? deviceId}) {
+  void serialCommand({int? deviceId, int? command}) {
     _gpioController.addToSerialMessageStack(
-      SerialMessage(device: deviceId ?? 0x01, command: 0x065),
+      SerialMessage(device: deviceId ?? 0x01, command: command ?? 0x065),
     );
   }
 

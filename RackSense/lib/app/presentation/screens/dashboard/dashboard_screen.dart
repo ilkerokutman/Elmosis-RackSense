@@ -35,8 +35,22 @@ class DashboardScreen extends StatelessWidget {
                       child: Text('serial test'),
                     ),
                     ElevatedButton(
-                      onPressed: ac.rebootDevice,
+                      onPressed: () {
+                        ac.serialCommand(command: 0x65);
+                      },
                       child: Text('reboot d'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        ac.serialCommand(command: 0x67);
+                      },
+                      child: Text('on d'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        ac.serialCommand(command: 0x68);
+                      },
+                      child: Text('off d'),
                     ),
                     ElevatedButton(onPressed: ac.buzzBeep, child: Text('beep')),
                   ],
