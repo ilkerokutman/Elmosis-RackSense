@@ -367,7 +367,7 @@ class GpioController extends GetxController {
   void _setTxEnable(bool value) {
     _txEnablePin?.write(value);
     _pinUartModeTxState.value = value;
-    update();
+    // update();
   }
 
   void _onSerialMessageReceived(Uint8List data) {
