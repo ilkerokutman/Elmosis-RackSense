@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/data/services/connectivity_service.dart';
 import 'package:rack_sense/app/data/services/database_service.dart';
+import 'package:rack_sense/app/data/services/serial_service.dart';
 
 class InitialBindings extends Bindings {
   @override
@@ -18,10 +19,10 @@ class InitialBindings extends Bindings {
     await Get.putAsync(() async => connectivityService, permanent: true);
     print("Dependency Injection: Connectivity Service initialized");
 
-    // print("Dependency Injection: Starting Serial init");
-    // await Get.putAsync(() async => SerialService(), permanent: true);
-    // final serialInitResult = await Get.find<SerialService>().initialize();
-    // print("Dependency Injection: Serial Initialization: $serialInitResult");
+    print("Dependency Injection: Starting Serial init");
+    await Get.putAsync(() async => SerialService(), permanent: true);
+    final serialInitResult = await Get.find<SerialService>().initialize();
+    print("Dependency Injection: Serial Initialization: $serialInitResult");
 
     // print("Dependency Injection: Starting GPIO init");
     // await Get.putAsync(() async => GpioController(), permanent: true);
