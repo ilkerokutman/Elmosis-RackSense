@@ -51,6 +51,10 @@ class SerialService {
 
       await CU.wait(500);
 
+      _serialPortReader = SerialPortReader(_serialPort!);
+
+      await CU.wait(500);
+
       _messageSubscription?.cancel();
       _messageSubscription = _serialPortReader!.stream.listen(
         (Uint8List data) {
