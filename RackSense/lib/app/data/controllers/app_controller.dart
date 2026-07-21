@@ -39,7 +39,7 @@ class AppController extends GetxController {
   GPIO? txEnablePin;
   SPI? spiAdc;
 
-  late StreamSubscription<Uint8List>? _serialMessageSubscription;
+  StreamSubscription<Uint8List>? _serialMessageSubscription;
 
   @override
   void onInit() {

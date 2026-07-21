@@ -21,8 +21,8 @@ class InitialBindings extends Bindings {
 
     print("Dependency Injection: Starting Serial init");
     await Get.putAsync(() async => SerialService(), permanent: true);
-    final serialInitResult = await Get.find<SerialService>().initialize();
-    print("Dependency Injection: Serial Initialization: $serialInitResult");
+    // final serialInitResult = await Get.find<SerialService>().initialize();
+    print("Dependency Injection: Serial Initialized");
 
     // print("Dependency Injection: Starting GPIO init");
     // await Get.putAsync(() async => GpioController(), permanent: true);
