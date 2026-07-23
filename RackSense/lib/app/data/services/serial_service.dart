@@ -81,8 +81,10 @@ class SerialService {
   }
 
   static int _responseLengthForCommand(int command) {
+    // Echo commands (0x64-0x68) on this firmware return a 7-byte frame,
+    // the same length as single-value reads; Read All is 15 bytes.
     if (command >= SerialKeys.cmdCommTest && command <= SerialKeys.cmdTurnOff) {
-      return kEchoMessageLength;
+      return kNormalMessageLength;
     }
     if (command == SerialKeys.cmdReadAll) {
       return kReadAllMessageLength;
