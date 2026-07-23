@@ -661,6 +661,9 @@ class AppController extends GetxController {
 
   void _setTxEnable(bool value) {
     final gpioValue = invertUartTx ? !value : value;
+    print(
+      'TX enable: logical=$value, invertUartTx=$invertUartTx, gpio=$gpioValue',
+    );
     uartModeTx?.write(gpioValue);
     _pinUartModeTxState.value = value;
     update();
@@ -725,7 +728,7 @@ class AppController extends GetxController {
       // Read inputs
       print('sending msg');
       await sendSerialMessage(
-        SerialMessage(device: deviceId, command: SerialKeys.cmdReadAll),
+        SerialMessage(device: deviceId, command: SerialKeys.cmdCommTest),
       );
 
       print('waiting response');

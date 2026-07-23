@@ -62,7 +62,7 @@ class SerialService {
           _handler.onDataReceived(data);
         },
         onError: (error) {
-          // error handled by caller
+          print('Serial reader error: $error');
         },
         cancelOnError: false,
       );
@@ -135,18 +135,26 @@ class SerialMessageHandler {
   }
 
   void onDataReceived(Uint8List data) {
+    print(
+      'raw bytes: ${data.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}',
+    );
     for (var byte in data) {
       _buffer.add(byte);
 
       int expectedLength = _getMessageLength(_buffer);
 
       if (_buffer.length >= expectedLength) {
+        final bufferHex = _buffer
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
+            .join(' ');
+        print('handler check: expected=$expectedLength, buffer=[$bufferHex]');
         if (_buffer[0] == kStartByte &&
             _buffer[expectedLength - 2] == kStopBytes[0] &&
             _buffer[expectedLength - 1] == kStopBytes[1]) {
           Uint8List message = Uint8List.fromList(
             _buffer.sublist(0, expectedLength),
           );
+          print('handler emitting: $bufferHex');
           _controller.add(message);
           _buffer.clear();
         } else {

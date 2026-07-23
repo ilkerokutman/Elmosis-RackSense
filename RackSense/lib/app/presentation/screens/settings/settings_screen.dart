@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/constants/serial.dart';
@@ -37,7 +35,7 @@ class SettingsScreen extends StatelessWidget {
                         itemBuilder: (context, index) => Text(
                           '>>> ${app.sentData[index].toList().toString()}',
                         ),
-                        itemCount: math.min(app.sentData.length, 8),
+                        itemCount: app.sentData.length,
                       ),
                     ),
                     Divider(),
@@ -46,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
                         itemBuilder: (context, index) => Text(
                           '<<< ${app.receivedData[index].toList().toString()}',
                         ),
-                        itemCount: math.min(app.receivedData.length, 8),
+                        itemCount: app.receivedData.length,
                       ),
                     ),
                   ],
@@ -125,6 +123,16 @@ class SettingsScreen extends StatelessWidget {
                             );
                           },
                           icon: Icon(Icons.power_off),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Invert TX: ${app.invertUartTx ? 'ON' : 'OFF'}'),
+                        Switch(
+                          value: app.invertUartTx,
+                          onChanged: (_) => app.toggleInvertUartTx(),
                         ),
                       ],
                     ),
