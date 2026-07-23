@@ -759,7 +759,6 @@ class AppController extends GetxController {
     final gpioValue = invertUartTx ? !value : value;
     uartModeTx?.write(gpioValue);
     _pinUartModeTxState.value = value;
-    update();
   }
 
   void addToSerialMessageStack(SerialMessage m) {

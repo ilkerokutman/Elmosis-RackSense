@@ -92,13 +92,6 @@ class SerialService {
     return kNormalMessageLength;
   }
 
-  /// Time required to clock out [byteCount] 8N1 bytes at [baudRate].
-  static int _frameTransmissionTimeMs(int byteCount, int baudRate) {
-    if (baudRate <= 0) return 10;
-    // 8N1 = start + 8 data + stop = 10 bits per byte.
-    return ((byteCount * 10 * 1000 + baudRate - 1) ~/ baudRate);
-  }
-
   Future<void> sendMessage(
     SerialMessage message, {
     required void Function(bool) setTxEnable,
@@ -110,7 +103,7 @@ class SerialService {
 
     // TX Enable: false = transmit mode, true = receive mode (inverted)
     setTxEnable(false);
-    await CU.wait(3); // let the transceiver switch to TX mode
+    CU.busyWait(3); // let the transceiver switch to TX mode
     _handler.clear(); // discard any stale bytes from previous RX windows
 
     final stopwatch = Stopwatch()..start();
@@ -130,7 +123,8 @@ class SerialService {
         print(
           'serial tx: attempt $writeAttempts, offset=$offset, '
           'written=$written, outQueue=$outBefore, '
-          'elapsed=${stopwatch.elapsedMilliseconds}ms',
+          't=${stopwatch.elapsedMicroseconds}us, '
+          'txT=${txStopwatch.elapsedMicroseconds}us',
         );
         if (written < 0) {
           throw SerialPortError('serial write failed');
@@ -139,7 +133,7 @@ class SerialService {
           if (stopwatch.elapsedMilliseconds > 1000) {
             throw SerialPortError('serial write timeout');
           }
-          await CU.wait(1);
+          CU.busyWaitMicroseconds(1000);
           continue;
         }
         if (!txStopwatch.isRunning) {
@@ -152,23 +146,33 @@ class SerialService {
       // baud rate, plus a short quiet gap. Don't use drain()/bytesToWrite;
       // they can return late and keep us in TX mode past the end of the frame.
       final baudRate = _serialPort!.config.baudRate;
-      final txTimeMs = _frameTransmissionTimeMs(bytes.length, baudRate);
-      final remainingMs = txTimeMs + 2 - txStopwatch.elapsedMilliseconds;
+      final txTimeUs =
+          ((bytes.length * 10 * 1000000 + baudRate - 1) ~/ baudRate);
+      final gapUs = 3000;
+      final elapsedUs = txStopwatch.elapsedMicroseconds;
+      final remainingUs = txTimeUs + gapUs - elapsedUs;
       print(
-        'serial tx: write done at ${stopwatch.elapsedMilliseconds}ms, '
-        'txTimeMs=$txTimeMs, txElapsed=${txStopwatch.elapsedMilliseconds}ms, '
-        'remaining=$remainingMs, outQueue=${_serialPort!.bytesToWrite}',
+        'serial tx: write done t=${stopwatch.elapsedMicroseconds}us, '
+        'txT=${txStopwatch.elapsedMicroseconds}us, txTimeUs=$txTimeUs, '
+        'remainingUs=$remainingUs, outQueue=${_serialPort!.bytesToWrite}',
       );
-      if (remainingMs > 0) {
-        print('serial tx: holding TX for ${remainingMs}ms');
-        await CU.wait(remainingMs);
+      if (remainingUs > 0) {
+        print('serial tx: holding TX for ${remainingUs}us');
+        CU.busyWaitMicroseconds(remainingUs);
       }
-      print('serial tx: frame sent in ${stopwatch.elapsedMilliseconds}ms');
+      print(
+        'serial tx: hold done t=${stopwatch.elapsedMicroseconds}us, '
+        'txT=${txStopwatch.elapsedMicroseconds}us',
+      );
+
+      setTxEnable(true);
+      print(
+        'serial tx: released t=${stopwatch.elapsedMicroseconds}us, '
+        'frame sent in ${stopwatch.elapsedMilliseconds}ms',
+      );
     } catch (e) {
       print('serial send error: ${e.toString()}');
     }
-
-    setTxEnable(true);
   }
 
   void dispose() {
