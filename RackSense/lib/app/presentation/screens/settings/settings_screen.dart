@@ -47,7 +47,9 @@ class SettingsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}'),
+                        Text(
+                          'Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'} ${app.processingSerialLoop ? 'Processing' : '---'}',
+                        ),
                         IconButton(
                           onPressed: () {
                             app.turnOnSerialLoop();

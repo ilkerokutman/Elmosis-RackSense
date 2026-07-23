@@ -549,7 +549,10 @@ class AppController extends GetxController {
   final RxList<int> _deviceIds = <int>[].obs;
   List<int> get deviceIds => _deviceIds;
   void _initializeDevices() {
-    _deviceIds.assignAll([mainboardId, SerialKeys.device1, SerialKeys.device2]);
+    _deviceIds.assignAll([
+      mainboardId, SerialKeys.device1,
+      // , SerialKeys.device2
+    ]);
     update();
   }
   //endregion
@@ -748,7 +751,7 @@ class AppController extends GetxController {
       return;
     }
 
-    if (currentSerialMessage!.command == 0x65) {
+    if (currentSerialMessage!.command == SerialKeys.cmdReset) {
       // Restart command - device cannot respond while restarting
       await CU.wait(kSerialAcknowledgementDelay);
       _currentSerialMessage.value = null;
