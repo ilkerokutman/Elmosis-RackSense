@@ -22,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Text('Current Serial Message:'),
-                    Text('${app.currentSerialMessage}'),
+                    Text('${app.currentSerialMessage?.toLog()}'),
                     Divider(),
                     ListView.builder(
                       itemBuilder: (context, index) => Text(
@@ -41,7 +41,15 @@ class SettingsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}'),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}'),
+                            Text(
+                              'TX: ${app.pinUartModeTxState ? 'ON' : 'OFF'}',
+                            ),
+                          ],
+                        ),
                         IconButton(
                           onPressed: () {
                             app.turnOnSerialLoop();
@@ -110,7 +118,7 @@ class SettingsScreen extends StatelessWidget {
                     Expanded(
                       child: ListView.builder(
                         itemBuilder: (context, index) =>
-                            Text('${app.messageStack[index]}'),
+                            Text(app.messageStack[index].toLog()),
                         itemCount: app.messageStack.length,
                       ),
                     ),
