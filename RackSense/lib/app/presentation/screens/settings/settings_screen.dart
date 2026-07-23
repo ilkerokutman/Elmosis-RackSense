@@ -127,12 +127,98 @@ class SettingsScreen extends StatelessWidget {
                       ],
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Invert TX: ${app.invertUartTx ? 'ON' : 'OFF'}'),
-                        Switch(
-                          value: app.invertUartTx,
-                          onChanged: (_) => app.toggleInvertUartTx(),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadNtc0,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.thermostat),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadNtc1,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.thermostat),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadNtc2,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.thermostat),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadNtc3,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.thermostat),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadFanLevel,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.wind_power),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadOutputs,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.upload),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadInputs,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.download),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadAll,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.auto_awesome),
                         ),
                       ],
                     ),

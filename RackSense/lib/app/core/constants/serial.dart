@@ -10,6 +10,7 @@ class SerialKeys {
   static const int cmdReadNtc2 = 0xCD;
   static const int cmdReadNtc3 = 0xCE;
   static const int cmdReadOutputs = 0xCF;
+  static const int cmdReadInputs = 0xD0;
   static const int cmdReadFanLevel = 0xD1;
   static const int cmdReadAll = 0xD2;
 

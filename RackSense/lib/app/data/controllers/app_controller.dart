@@ -767,7 +767,9 @@ class AppController extends GetxController {
     }
 
     int timeoutMillis = 0;
-    const maxTimeout = 1000;
+    final maxTimeout = currentSerialMessage!.command == SerialKeys.cmdReadAll
+        ? kReadAllTimeoutMillis
+        : 1000;
 
     while (currentSerialMessage != null && timeoutMillis < maxTimeout) {
       timeoutMillis++;
@@ -795,7 +797,7 @@ class AppController extends GetxController {
   final RxBool _inputPollIndicator = false.obs;
   bool get inputPollIndicator => _inputPollIndicator.value;
 
-  final RxBool _invertUartTx = false.obs;
+  final RxBool _invertUartTx = true.obs;
   bool get invertUartTx => _invertUartTx.value;
   void toggleInvertUartTx() {
     _invertUartTx.value = !_invertUartTx.value;

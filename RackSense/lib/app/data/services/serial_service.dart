@@ -12,6 +12,7 @@ const int kSerialAcknowledgementDelay = 91;
 const int kSerialLoopDelay = 10000;
 const int kNormalMessageLength = 7;
 const int kReadAllMessageLength = 14;
+const int kReadAllTimeoutMillis = 5000;
 
 class SerialService {
   SerialPort? _serialPort;
@@ -88,6 +89,7 @@ class SerialService {
     // TX Enable: false = transmit mode, true = receive mode (inverted)
     setTxEnable(false);
     await CU.wait(1);
+    _handler.clear(); // discard any stale bytes from previous RX windows
 
     try {
       _serialPort!.write(bytes);
@@ -117,6 +119,10 @@ class SerialMessageHandler {
   final StreamController<Uint8List> _controller =
       StreamController<Uint8List>.broadcast();
   Stream<Uint8List> get onMessage => _controller.stream;
+
+  void clear() {
+    _buffer.clear();
+  }
 
   int _getMessageLength(List<int> buffer) {
     if (buffer.length >= 3 && buffer[2] == 0xD2) {
