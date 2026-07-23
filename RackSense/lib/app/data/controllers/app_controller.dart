@@ -144,50 +144,105 @@ class AppController extends GetxController {
   Future<void> _initializeGpio() async {
     if (!Platform.isLinux) return;
     print('GPIO init: #0');
+    // try {
     try {
       uartModeTx = GPIO(4, GPIOdirection.gpioDirOut);
-
-      print('GPIO init: #1');
-      buzzer = GPIO(0, GPIOdirection.gpioDirOut);
-      print('GPIO init: #2');
-      btn1 = GPIO(17, GPIOdirection.gpioDirIn);
-
-      print('GPIO init: #3');
-      btn2 = GPIO(18, GPIOdirection.gpioDirIn);
-      print('GPIO init: #4');
-      btn3 = GPIO(27, GPIOdirection.gpioDirIn);
-      print('GPIO init: #5');
-      btn4 = GPIO(22, GPIOdirection.gpioDirIn);
-      print('GPIO init: #6');
-      outPinSER = GPIO(23, GPIOdirection.gpioDirOut);
-      print('GPIO init: #7');
-      outPinSRCLK = GPIO(24, GPIOdirection.gpioDirOut);
-      print('GPIO init: #8');
-      outPinRCLK = GPIO(25, GPIOdirection.gpioDirOut);
-      print('GPIO init: #9');
-      in1 = GPIO(5, GPIOdirection.gpioDirIn);
-      print('GPIO init: #10');
-      in2 = GPIO(6, GPIOdirection.gpioDirIn);
-      print('GPIO init: #11');
-      in3 = GPIO(12, GPIOdirection.gpioDirIn);
-      print('GPIO init: #12');
-      in4 = GPIO(13, GPIOdirection.gpioDirIn);
-      print('GPIO init: #13');
-      in5 = GPIO(19, GPIOdirection.gpioDirIn);
-      print('GPIO init: #14');
-      in6 = GPIO(16, GPIOdirection.gpioDirIn);
-      print('GPIO init: #15');
-      in7 = GPIO(26, GPIOdirection.gpioDirIn);
-      print('GPIO init: #16');
-      in8 = GPIO(20, GPIOdirection.gpioDirIn);
-      print('GPIO init: #17');
-      txEnablePin = GPIO(21, GPIOdirection.gpioDirOut);
-      print('GPIO init: #18');
-      spiAdc = SPI(0, 0, SPImode.mode0, 1000000);
-      print('GPIO init: #19');
-    } on Exception catch (e) {
-      print('initializeGpio error: ${e.toString()}');
+    } catch (e) {
+      print('GPIO init: #1 ${e.toString()}');
     }
+    try {
+      buzzer = GPIO(0, GPIOdirection.gpioDirOut);
+    } catch (e) {
+      print('GPIO init: #2 ${e.toString()}');
+    }
+    try {
+      btn1 = GPIO(17, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #3 ${e.toString()}');
+    }
+    try {
+      btn2 = GPIO(18, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #4 ${e.toString()}');
+    }
+    try {
+      btn3 = GPIO(27, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #5 ${e.toString()}');
+    }
+    try {
+      btn4 = GPIO(22, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #6 ${e.toString()}');
+    }
+    try {
+      outPinSER = GPIO(23, GPIOdirection.gpioDirOut);
+    } catch (e) {
+      print('GPIO init: #7 ${e.toString()}');
+    }
+    try {
+      outPinSRCLK = GPIO(24, GPIOdirection.gpioDirOut);
+    } catch (e) {
+      print('GPIO init: #8 ${e.toString()}');
+    }
+    try {
+      outPinRCLK = GPIO(25, GPIOdirection.gpioDirOut);
+    } catch (e) {
+      print('GPIO init: #9 ${e.toString()}');
+    }
+    try {
+      in1 = GPIO(5, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #10 ${e.toString()}');
+    }
+    try {
+      in2 = GPIO(6, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #11 ${e.toString()}');
+    }
+    try {
+      in3 = GPIO(12, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #12 ${e.toString()}');
+    }
+    try {
+      in4 = GPIO(13, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #13 ${e.toString()}');
+    }
+    try {
+      in5 = GPIO(19, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #14 ${e.toString()}');
+    }
+    try {
+      in6 = GPIO(16, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #15 ${e.toString()}');
+    }
+    try {
+      in7 = GPIO(26, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #16 ${e.toString()}');
+    }
+    try {
+      in8 = GPIO(20, GPIOdirection.gpioDirIn);
+    } catch (e) {
+      print('GPIO init: #17 ${e.toString()}');
+    }
+    try {
+      txEnablePin = GPIO(21, GPIOdirection.gpioDirOut);
+    } catch (e) {
+      print('GPIO init: #18 ${e.toString()}');
+    }
+    try {
+      spiAdc = SPI(0, 0, SPImode.mode0, 1000000);
+    } catch (e) {
+      print('GPIO init: #19 ${e.toString()}');
+    }
+    // } on Exception catch (e) {
+    //   print('initializeGpio error: ${e.toString()}');
+    // }
     await CU.wait(50);
 
     // pin states
