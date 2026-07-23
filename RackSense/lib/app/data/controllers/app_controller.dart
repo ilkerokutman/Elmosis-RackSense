@@ -628,10 +628,15 @@ class AppController extends GetxController {
       'A:0x${args.toRadixString(16).padLeft(2, '0')}',
     );
 
-    // Clear current message if this is the response
+    // Clear current message if this is the response.
+    // Read-value replies replace the command byte with the value itself,
+    // so for read commands (0xCA+) we also accept a 7-byte reply from the
+    // same device.
     if (currentSerialMessage != null &&
-        currentSerialMessage!.command == command &&
-        currentSerialMessage!.device == deviceId) {
+        currentSerialMessage!.device == deviceId &&
+        (currentSerialMessage!.command == command ||
+            (currentSerialMessage!.command >= SerialKeys.cmdReadValue &&
+                data.length == kNormalMessageLength))) {
       _currentSerialMessage.value = null;
       update();
     }
@@ -661,9 +666,6 @@ class AppController extends GetxController {
 
   void _setTxEnable(bool value) {
     final gpioValue = invertUartTx ? !value : value;
-    print(
-      'TX enable: logical=$value, invertUartTx=$invertUartTx, gpio=$gpioValue',
-    );
     uartModeTx?.write(gpioValue);
     _pinUartModeTxState.value = value;
     update();
@@ -728,7 +730,7 @@ class AppController extends GetxController {
       // Read inputs
       print('sending msg');
       await sendSerialMessage(
-        SerialMessage(device: deviceId, command: SerialKeys.cmdCommTest),
+        SerialMessage(device: deviceId, command: SerialKeys.cmdReadAll),
       );
 
       print('waiting response');

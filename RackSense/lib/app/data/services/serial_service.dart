@@ -10,9 +10,8 @@ const List<int> kStopBytes = [0x0D, 0x0A];
 const String kSserialPort = '/dev/ttyS0';
 const int kSerialAcknowledgementDelay = 91;
 const int kSerialLoopDelay = 10000;
-const int kNormalMessageLength = 9;
-const int kSerialNumberMessageLength = 21;
-const int kVersionMessageLength = 28;
+const int kNormalMessageLength = 7;
+const int kReadAllMessageLength = 14;
 
 class SerialService {
   SerialPort? _serialPort;
@@ -120,41 +119,25 @@ class SerialMessageHandler {
   Stream<Uint8List> get onMessage => _controller.stream;
 
   int _getMessageLength(List<int> buffer) {
-    if (buffer.length >= 3) {
-      switch (buffer[2]) {
-        case 0xCA: // serial number
-          return kSerialNumberMessageLength;
-        case 0xCB: // hardware version
-        case 0xCC: // firmware version
-          return kVersionMessageLength;
-        default:
-          return kNormalMessageLength;
-      }
+    if (buffer.length >= 3 && buffer[2] == 0xD2) {
+      return kReadAllMessageLength;
     }
     return kNormalMessageLength;
   }
 
   void onDataReceived(Uint8List data) {
-    print(
-      'raw bytes: ${data.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}',
-    );
     for (var byte in data) {
       _buffer.add(byte);
 
       int expectedLength = _getMessageLength(_buffer);
 
       if (_buffer.length >= expectedLength) {
-        final bufferHex = _buffer
-            .map((b) => b.toRadixString(16).padLeft(2, '0'))
-            .join(' ');
-        print('handler check: expected=$expectedLength, buffer=[$bufferHex]');
         if (_buffer[0] == kStartByte &&
             _buffer[expectedLength - 2] == kStopBytes[0] &&
             _buffer[expectedLength - 1] == kStopBytes[1]) {
           Uint8List message = Uint8List.fromList(
             _buffer.sublist(0, expectedLength),
           );
-          print('handler emitting: $bufferHex');
           _controller.add(message);
           _buffer.clear();
         } else {
@@ -184,18 +167,15 @@ class SerialMessage {
   });
 
   List<int> toBytesWithCrc() {
-    List<int> dataForCrc = [device, command, index, arg];
-    List<int> crcBytes = SerialUtils.getCrcBytes(
-      Uint8List.fromList(dataForCrc),
-    );
-
+    // Per KL-01-H-485 protocol the master frame uses 0x00 for both CRC bytes.
     return [
       kStartByte,
       device,
       command,
       index,
       arg,
-      ...crcBytes,
+      0x00, // CRCH
+      0x00, // CRCL
       ...kStopBytes,
     ];
   }
