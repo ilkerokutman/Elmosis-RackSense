@@ -13,7 +13,7 @@ const int kSerialAcknowledgementDelay = 91;
 const int kSerialLoopDelay = 10000;
 const int kNormalMessageLength = 7;
 const int kEchoMessageLength = 9;
-const int kReadAllMessageLength = 14;
+const int kReadAllMessageLength = 15;
 const int kReadAllTimeoutMillis = 5000;
 
 class SerialService {

@@ -661,43 +661,43 @@ class AppController extends GetxController {
         print('Turn Off acknowledged');
       case SerialKeys.cmdReadValue:
         print(
-          'Read Set Value: ${commandByte.toSigned(8)}°C '
-          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+          'Read Set Value: ${args.toSigned(8)}°C '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
         );
       case SerialKeys.cmdReadNtc0:
         print(
-          'Read NTC0: ${commandByte.toSigned(8)}°C '
-          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+          'Read NTC0: ${args.toSigned(8)}°C '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
         );
       case SerialKeys.cmdReadNtc1:
         print(
-          'Read NTC1: ${commandByte.toSigned(8)}°C '
-          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+          'Read NTC1: ${args.toSigned(8)}°C '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
         );
       case SerialKeys.cmdReadNtc2:
         print(
-          'Read NTC2: ${commandByte.toSigned(8)}°C '
-          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+          'Read NTC2: ${args.toSigned(8)}°C '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
         );
       case SerialKeys.cmdReadNtc3:
         print(
-          'Read NTC3: ${commandByte.toSigned(8)}°C '
-          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+          'Read NTC3: ${args.toSigned(8)}°C '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
         );
       case SerialKeys.cmdReadOutputs:
         print(
           'Read Output Pins: '
-          '0b${commandByte.toRadixString(2).padLeft(8, '0')} '
-          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+          '0b${args.toRadixString(2).padLeft(8, '0')} '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
         );
       case SerialKeys.cmdReadInputs:
         print(
           'Read Input Pins: '
-          '0b${commandByte.toRadixString(2).padLeft(8, '0')} '
-          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+          '0b${args.toRadixString(2).padLeft(8, '0')} '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
         );
       case SerialKeys.cmdReadFanLevel:
-        print('Read Fan Level: ${commandByte.toSigned(8)}');
+        print('Read Fan Level: ${args.toSigned(8)}');
       case SerialKeys.cmdReadAll:
         _printReadAllValues(data);
       default:
@@ -728,9 +728,16 @@ class AppController extends GetxController {
     for (var i = 0; i < values.length && i < labels.length; i++) {
       final label = labels[i];
       final value = values[i];
-      final display = label.startsWith('NTC')
-          ? '${value.toSigned(8)}°C'
-          : '0x${value.toRadixString(16).padLeft(2, '0')}';
+      final String display;
+      if (label.startsWith('NTC') || label == 'SetValue') {
+        display = '${value.toSigned(8)}°C';
+      } else if (label == 'FanLevel') {
+        display = '${value.toSigned(8)}';
+      } else if (label == 'Outputs' || label == 'Inputs') {
+        display = '0b${value.toRadixString(2).padLeft(8, '0')}';
+      } else {
+        display = '0x${value.toRadixString(16).padLeft(2, '0')}';
+      }
       mapped.add('$label=$display');
     }
     print('  ${mapped.join(', ')}');
