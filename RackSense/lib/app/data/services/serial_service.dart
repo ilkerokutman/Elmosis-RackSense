@@ -108,6 +108,11 @@ class SerialService {
     final bytes = message.toBytes();
     _handler.setExpectedLength(_responseLengthForCommand(message.command));
 
+    // Discard any unsent output bytes from a previous early release while we
+    // are still in RX mode, so they don't leak onto the bus when the driver
+    // is re-enabled and don't block the next write.
+    _serialPort!.flush(SerialPortBuffer.output);
+
     // TX Enable: false = transmit mode, true = receive mode (inverted)
     setTxEnable(false);
     await CU.wait(3); // let the transceiver switch to TX mode
