@@ -108,11 +108,6 @@ class SerialService {
     final bytes = message.toBytes();
     _handler.setExpectedLength(_responseLengthForCommand(message.command));
 
-    // Discard any unsent output bytes from a previous early release while we
-    // are still in RX mode, so they don't leak onto the bus when the driver
-    // is re-enabled and don't block the next write.
-    _serialPort!.flush(SerialPortBuffer.output);
-
     // TX Enable: false = transmit mode, true = receive mode (inverted)
     setTxEnable(false);
     await CU.wait(3); // let the transceiver switch to TX mode
@@ -125,9 +120,17 @@ class SerialService {
       // Start the TX timer from the first byte the driver actually accepts,
       // because the UART begins shifting it out immediately.
       var offset = 0;
+      var writeAttempts = 0;
       while (offset < bytes.length) {
+        final outBefore = _serialPort!.bytesToWrite;
         final written = _serialPort!.write(
           Uint8List.sublistView(bytes, offset),
+        );
+        writeAttempts++;
+        print(
+          'serial tx: attempt $writeAttempts, offset=$offset, '
+          'written=$written, outQueue=$outBefore, '
+          'elapsed=${stopwatch.elapsedMilliseconds}ms',
         );
         if (written < 0) {
           throw SerialPortError('serial write failed');
@@ -151,6 +154,11 @@ class SerialService {
       final baudRate = _serialPort!.config.baudRate;
       final txTimeMs = _frameTransmissionTimeMs(bytes.length, baudRate);
       final remainingMs = txTimeMs + 2 - txStopwatch.elapsedMilliseconds;
+      print(
+        'serial tx: write done at ${stopwatch.elapsedMilliseconds}ms, '
+        'txTimeMs=$txTimeMs, txElapsed=${txStopwatch.elapsedMilliseconds}ms, '
+        'remaining=$remainingMs, outQueue=${_serialPort!.bytesToWrite}',
+      );
       if (remainingMs > 0) {
         print('serial tx: holding TX for ${remainingMs}ms');
         await CU.wait(remainingMs);
