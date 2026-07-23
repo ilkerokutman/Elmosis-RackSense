@@ -30,11 +30,24 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     Text('${app.currentSerialMessage?.toLog()}'),
                     Divider(),
-                    ListView.builder(
-                      itemBuilder: (context, index) => Text(
-                        '<<< ${app.receivedData[index].toList().toString()}',
+                    Expanded(
+                      child: ListView.builder(
+                        itemBuilder: (context, index) => Text(
+                          '>>> ${app.sentData[index].toList().toString()}',
+                        ),
+                        itemCount: app.sentData.length,
+                        reverse: true,
                       ),
-                      itemCount: app.receivedData.length,
+                    ),
+                    Divider(),
+                    Expanded(
+                      child: ListView.builder(
+                        itemBuilder: (context, index) => Text(
+                          '<<< ${app.receivedData[index].toList().toString()}',
+                        ),
+                        itemCount: app.receivedData.length,
+                        reverse: true,
+                      ),
                     ),
                   ],
                 ),
