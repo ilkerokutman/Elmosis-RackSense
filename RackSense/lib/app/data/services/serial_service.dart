@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:rack_sense/app/core/constants/serial.dart';
 import 'package:rack_sense/app/core/utils/common_utils.dart';
 
 const int kStartByte = 0x3A;
@@ -11,6 +12,7 @@ const String kSserialPort = '/dev/ttyS0';
 const int kSerialAcknowledgementDelay = 91;
 const int kSerialLoopDelay = 10000;
 const int kNormalMessageLength = 7;
+const int kEchoMessageLength = 9;
 const int kReadAllMessageLength = 14;
 const int kReadAllTimeoutMillis = 5000;
 
@@ -78,6 +80,16 @@ class SerialService {
     }
   }
 
+  static int _responseLengthForCommand(int command) {
+    if (command >= SerialKeys.cmdCommTest && command <= SerialKeys.cmdTurnOff) {
+      return kEchoMessageLength;
+    }
+    if (command == SerialKeys.cmdReadAll) {
+      return kReadAllMessageLength;
+    }
+    return kNormalMessageLength;
+  }
+
   Future<void> sendMessage(
     SerialMessage message, {
     required void Function(bool) setTxEnable,
@@ -85,6 +97,7 @@ class SerialService {
     if (!_initialized || _serialPort == null) return;
 
     final bytes = message.toBytes();
+    _handler.setExpectedLength(_responseLengthForCommand(message.command));
 
     // TX Enable: false = transmit mode, true = receive mode (inverted)
     setTxEnable(false);
@@ -120,11 +133,20 @@ class SerialMessageHandler {
       StreamController<Uint8List>.broadcast();
   Stream<Uint8List> get onMessage => _controller.stream;
 
+  int? _expectedLength;
+
   void clear() {
     _buffer.clear();
   }
 
+  void setExpectedLength(int length) {
+    _expectedLength = length;
+  }
+
   int _getMessageLength(List<int> buffer) {
+    if (_expectedLength != null) {
+      return _expectedLength!;
+    }
     if (buffer.length >= 3 && buffer[2] == 0xD2) {
       return kReadAllMessageLength;
     }

@@ -172,6 +172,29 @@ class SettingsScreen extends StatelessWidget {
                           },
                           icon: Icon(Icons.thermostat),
                         ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReadValue,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.chevron_left),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdSetValue,
+                                arg: 0x19, // sample value sets to 25 degreees
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.chevron_right),
+                        ),
                       ],
                     ),
                     Row(

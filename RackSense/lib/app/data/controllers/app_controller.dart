@@ -617,13 +617,15 @@ class AppController extends GetxController {
 
   void _parseSerialMessage(List<int> data) {
     final deviceId = data[1];
-    final command = data[2];
+    final commandByte = data[2];
     final index = data[3];
     final args = data[4];
+    final sentMessage = currentSerialMessage;
+    final sentCommand = sentMessage?.command ?? -1;
 
     print(
       '<<<< D:0x${deviceId.toRadixString(16).padLeft(2, '0')} '
-      'C:0x${command.toRadixString(16).padLeft(2, '0')} '
+      'C:0x${commandByte.toRadixString(16).padLeft(2, '0')} '
       'I:0x${index.toRadixString(16).padLeft(2, '0')} '
       'A:0x${args.toRadixString(16).padLeft(2, '0')}',
     );
@@ -632,36 +634,106 @@ class AppController extends GetxController {
     // Read-value replies replace the command byte with the value itself,
     // so for read commands (0xCA+) we also accept a 7-byte reply from the
     // same device.
-    if (currentSerialMessage != null &&
-        currentSerialMessage!.device == deviceId &&
-        (currentSerialMessage!.command == command ||
-            (currentSerialMessage!.command >= SerialKeys.cmdReadValue &&
+    if (sentMessage != null &&
+        sentMessage.device == deviceId &&
+        (sentMessage.command == commandByte ||
+            (sentMessage.command >= SerialKeys.cmdReadValue &&
                 data.length == kNormalMessageLength))) {
       _currentSerialMessage.value = null;
       update();
     }
 
-    switch (command) {
-      case 0x64: // test
-      case 0x65: // device reset/reboot
-      case 0x66: // update set value
-      case 0x67: // turn device on
-      case 0x68: // turn device off
-      case 0xCA: // read set value
-      case 0xCB: // read NTC0
-      case 0xCC: // read NTC1
-      case 0xCD: // read NTC2
-      case 0xCE: // read NTC3
-      case 0xCF: // read outputs
-      case 0xD0: // read inputs
-      case 0xD1: // read fan level
-      case 0xD2: // read all values
-        print('message received, command: $command');
-        break;
+    switch (sentCommand) {
+      case SerialKeys.cmdCommTest:
+        print(
+          'CommTest echo: ${SerialUtils.bytesToHex(Uint8List.fromList(data))}',
+        );
+      case SerialKeys.cmdReset:
+        print('Reset acknowledged');
+      case SerialKeys.cmdSetValue:
+        print(
+          'Set Value acknowledged: ${args.toSigned(8)}°C '
+          '(0x${args.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdTurnOn:
+        print('Turn On acknowledged');
+      case SerialKeys.cmdTurnOff:
+        print('Turn Off acknowledged');
+      case SerialKeys.cmdReadValue:
+        print(
+          'Read Set Value: ${commandByte.toSigned(8)}°C '
+          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdReadNtc0:
+        print(
+          'Read NTC0: ${commandByte.toSigned(8)}°C '
+          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdReadNtc1:
+        print(
+          'Read NTC1: ${commandByte.toSigned(8)}°C '
+          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdReadNtc2:
+        print(
+          'Read NTC2: ${commandByte.toSigned(8)}°C '
+          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdReadNtc3:
+        print(
+          'Read NTC3: ${commandByte.toSigned(8)}°C '
+          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdReadOutputs:
+        print(
+          'Read Output Pins: '
+          '0b${commandByte.toRadixString(2).padLeft(8, '0')} '
+          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdReadInputs:
+        print(
+          'Read Input Pins: '
+          '0b${commandByte.toRadixString(2).padLeft(8, '0')} '
+          '(0x${commandByte.toRadixString(16).padLeft(2, '0')})',
+        );
+      case SerialKeys.cmdReadFanLevel:
+        print('Read Fan Level: ${commandByte.toSigned(8)}');
+      case SerialKeys.cmdReadAll:
+        _printReadAllValues(data);
       default:
         print('unknown serial command received');
-        break;
     }
+  }
+
+  void _printReadAllValues(List<int> data) {
+    final values = data.sublist(3, data.length - 2);
+    final hex = values
+        .map((b) => '0x${b.toRadixString(16).padLeft(2, '0')}')
+        .join(' ');
+    print('Read All Values (${values.length} bytes): $hex');
+
+    final labels = [
+      'ErrorCode',
+      'DeviceStatus',
+      'SetValue',
+      'NTC0',
+      'NTC1',
+      'NTC2',
+      'NTC3',
+      'Outputs',
+      'Inputs',
+      'FanLevel',
+    ];
+    final mapped = <String>[];
+    for (var i = 0; i < values.length && i < labels.length; i++) {
+      final label = labels[i];
+      final value = values[i];
+      final display = label.startsWith('NTC')
+          ? '${value.toSigned(8)}°C'
+          : '0x${value.toRadixString(16).padLeft(2, '0')}';
+      mapped.add('$label=$display');
+    }
+    print('  ${mapped.join(', ')}');
   }
 
   void _setTxEnable(bool value) {
