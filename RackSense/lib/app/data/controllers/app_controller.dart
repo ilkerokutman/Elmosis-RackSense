@@ -662,6 +662,7 @@ class AppController extends GetxController {
   void _setTxEnable(bool value) {
     uartModeTx?.write(value);
     _pinUartModeTxState.value = value;
+    update();
   }
 
   void addToSerialMessageStack(SerialMessage m) {
