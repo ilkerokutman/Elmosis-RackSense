@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/constants/serial.dart';
@@ -35,8 +37,7 @@ class SettingsScreen extends StatelessWidget {
                         itemBuilder: (context, index) => Text(
                           '>>> ${app.sentData[index].toList().toString()}',
                         ),
-                        itemCount: app.sentData.length,
-                        reverse: true,
+                        itemCount: math.min(app.sentData.length, 8),
                       ),
                     ),
                     Divider(),
@@ -45,8 +46,7 @@ class SettingsScreen extends StatelessWidget {
                         itemBuilder: (context, index) => Text(
                           '<<< ${app.receivedData[index].toList().toString()}',
                         ),
-                        itemCount: app.receivedData.length,
-                        reverse: true,
+                        itemCount: math.min(app.receivedData.length, 8),
                       ),
                     ),
                   ],
