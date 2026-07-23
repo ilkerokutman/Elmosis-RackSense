@@ -144,11 +144,12 @@ class AppController extends GetxController {
   Future<void> _initializeGpio() async {
     if (!Platform.isLinux) return;
     print('GPIO init: #0');
-    // try {
     try {
       uartModeTx = GPIO(4, GPIOdirection.gpioDirOut);
+    } on GPIOexception catch (e) {
+      print('GPIO init: uartModeTx ${e.toString()}');
     } catch (e) {
-      print('GPIO init: #1 ${e.toString()}');
+      print('GPIO init: ${e.toString()}');
     }
     try {
       buzzer = GPIO(0, GPIOdirection.gpioDirOut);
@@ -240,9 +241,6 @@ class AppController extends GetxController {
     } catch (e) {
       print('GPIO init: #19 ${e.toString()}');
     }
-    // } on Exception catch (e) {
-    //   print('initializeGpio error: ${e.toString()}');
-    // }
     await CU.wait(50);
 
     // pin states
