@@ -21,7 +21,13 @@ class SettingsScreen extends StatelessWidget {
                 flex: 3,
                 child: Column(
                   children: [
-                    Text('Current Serial Message:'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Current Serial Message:'),
+                        Text('TX: ${app.pinUartModeTxState ? 'ON' : 'OFF'}'),
+                      ],
+                    ),
                     Text('${app.currentSerialMessage?.toLog()}'),
                     Divider(),
                     ListView.builder(
@@ -41,15 +47,7 @@ class SettingsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}'),
-                            Text(
-                              'TX: ${app.pinUartModeTxState ? 'ON' : 'OFF'}',
-                            ),
-                          ],
-                        ),
+                        Text('Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}'),
                         IconButton(
                           onPressed: () {
                             app.turnOnSerialLoop();
