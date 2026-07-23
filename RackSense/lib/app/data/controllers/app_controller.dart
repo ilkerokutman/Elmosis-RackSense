@@ -660,7 +660,8 @@ class AppController extends GetxController {
   }
 
   void _setTxEnable(bool value) {
-    uartModeTx?.write(value);
+    final gpioValue = invertUartTx ? !value : value;
+    uartModeTx?.write(gpioValue);
     _pinUartModeTxState.value = value;
     update();
   }
@@ -763,8 +764,7 @@ class AppController extends GetxController {
     int timeoutMillis = 0;
     const maxTimeout = 1000;
 
-    while (currentSerialMessage != null &&
-        timeoutMillis < kSerialAcknowledgementDelay) {
+    while (currentSerialMessage != null && timeoutMillis < maxTimeout) {
       timeoutMillis++;
       await CU.wait(1);
       if (timeoutMillis >= maxTimeout) {

@@ -92,11 +92,12 @@ class SerialService {
 
     try {
       _serialPort!.write(bytes);
+      _serialPort!.drain(); // wait until all bytes are physically sent
+      await CU.wait(2); // small guard time for the transceiver
     } catch (e) {
       print('serial send error: ${e.toString()}');
     }
 
-    await CU.wait(10);
     setTxEnable(true);
   }
 
