@@ -17,9 +17,24 @@ class SettingsScreen extends StatelessWidget {
           title: 'Ayarlar',
           body: Row(
             children: [
-              Expanded(flex: 3, child: Container()),
               Expanded(
-                flex: 1,
+                flex: 3,
+                child: Column(
+                  children: [
+                    Text('Current Serial Message:'),
+                    Text('${app.currentSerialMessage}'),
+                    Divider(),
+                    ListView.builder(
+                      itemBuilder: (context, index) => Text(
+                        '<<< ${app.receivedData[index].toList().toString()}',
+                      ),
+                      itemCount: app.receivedData.length,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 3,
                 child: Column(
                   spacing: 8,
                   children: [
