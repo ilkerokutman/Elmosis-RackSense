@@ -591,6 +591,18 @@ class AppController extends GetxController {
       _onSerialMessageReceived(data);
     });
 
+    // Wake-up handshake: give the extension board one comm-test exchange
+    // before the first Read All, so it is ready to emit the full 15-byte response.
+    print('Serial handshake...');
+    await sendSerialMessage(
+      SerialMessage(
+        device: SerialKeys.device1,
+        command: SerialKeys.cmdCommTest,
+      ),
+    );
+    await waitForSerialResponse();
+    print('Serial handshake complete');
+
     // run polling
     _allowSerialLoop.value = true;
     update();
