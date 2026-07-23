@@ -178,103 +178,121 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return AppScaffold(
       selectedIndex: 5,
       title: 'Ayarlar',
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Device Control (Dev Mode)',
-              style: Theme.of(context).textTheme.headlineSmall,
+      body: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Device Control (Dev Mode)',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildValueRow(
+                    'Set Temperature',
+                    _setTemperature == null ? null : '$_setTemperature°C',
+                  ),
+                  _buildValueRow('NTC0', _ntc0 == null ? null : '$_ntc0°C'),
+                  _buildValueRow('NTC1', _ntc1 == null ? null : '$_ntc1°C'),
+                  _buildValueRow('NTC2', _ntc2 == null ? null : '$_ntc2°C'),
+                  _buildValueRow('NTC3', _ntc3 == null ? null : '$_ntc3°C'),
+                  _buildValueRow(
+                    'Fan Level',
+                    _fanLevel == null ? null : '$_fanLevel',
+                  ),
+                  _buildValueRow('Outputs', outputsText),
+                  _buildValueRow('Inputs', inputsText),
+                  _buildValueRow(
+                    'Device Status',
+                    _deviceStatus == null
+                        ? null
+                        : '0x${_deviceStatus!.toRadixString(16).padLeft(2, '0')}',
+                  ),
+                  _buildValueRow(
+                    'Running',
+                    _isRunning == null ? null : (_isRunning! ? 'ON' : 'OFF'),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            _buildValueRow(
-              'Set Temperature',
-              _setTemperature == null ? null : '$_setTemperature°C',
-            ),
-            _buildValueRow('NTC0', _ntc0 == null ? null : '$_ntc0°C'),
-            _buildValueRow('NTC1', _ntc1 == null ? null : '$_ntc1°C'),
-            _buildValueRow('NTC2', _ntc2 == null ? null : '$_ntc2°C'),
-            _buildValueRow('NTC3', _ntc3 == null ? null : '$_ntc3°C'),
-            _buildValueRow(
-              'Fan Level',
-              _fanLevel == null ? null : '$_fanLevel',
-            ),
-            _buildValueRow('Outputs', outputsText),
-            _buildValueRow('Inputs', inputsText),
-            _buildValueRow(
-              'Device Status',
-              _deviceStatus == null
-                  ? null
-                  : '0x${_deviceStatus!.toRadixString(16).padLeft(2, '0')}',
-            ),
-            _buildValueRow(
-              'Running',
-              _isRunning == null ? null : (_isRunning! ? 'ON' : 'OFF'),
-            ),
-            const SizedBox(height: 24),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Set Temperature',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+          ),
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        IconButton(
-                          onPressed: _isSetTempBusy
-                              ? null
-                              : () => _changeSetTemperature(-1),
-                          icon: const Icon(Icons.remove),
+                        Text(
+                          'Set Temperature',
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            _setTemperature == null
-                                ? '--°C'
-                                : '$_setTemperature°C',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _isSetTempBusy
-                              ? null
-                              : () => _changeSetTemperature(1),
-                          icon: const Icon(Icons.add),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              onPressed: _isSetTempBusy
+                                  ? null
+                                  : () => _changeSetTemperature(-1),
+                              icon: const Icon(Icons.remove),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                _setTemperature == null
+                                    ? '--°C'
+                                    : '$_setTemperature°C',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineSmall,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _isSetTempBusy
+                                  ? null
+                                  : () => _changeSetTemperature(1),
+                              icon: const Icon(Icons.add),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _isOnOffBusy || _isRunning == null
+                      ? null
+                      : () => _toggleOnOff(!_isRunning!),
+                  child: Text(
+                    _isOnOffBusy
+                        ? 'Waiting...'
+                        : _isRunning == true
+                        ? 'Turn Off'
+                        : 'Turn On',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: _refresh,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Refresh Readings'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _isOnOffBusy || _isRunning == null
-                  ? null
-                  : () => _toggleOnOff(!_isRunning!),
-              child: Text(
-                _isOnOffBusy
-                    ? 'Waiting...'
-                    : _isRunning == true
-                    ? 'Turn Off'
-                    : 'Turn On',
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _refresh,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Refresh Readings'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
