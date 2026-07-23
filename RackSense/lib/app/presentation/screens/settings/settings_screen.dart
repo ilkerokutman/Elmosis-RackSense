@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:rack_sense/app/core/constants/serial.dart';
+import 'package:rack_sense/app/data/controllers/app_controller.dart';
+import 'package:rack_sense/app/data/services/serial_service.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -6,10 +10,94 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      selectedIndex: 5,
-      title: 'Ayarlar',
-      body: Center(child: Text('TODO: Ayarlar sayfasi')),
+    return GetBuilder<AppController>(
+      builder: (app) {
+        return AppScaffold(
+          selectedIndex: 5,
+          title: 'Ayarlar',
+          body: Row(
+            children: [
+              Expanded(flex: 3, child: Container()),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  spacing: 8,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}',
+                          ),
+                        ),
+                        Text('Stack: ${app.messageStack.length}'),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdReset,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.restart_alt_outlined),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdCommTest,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.text_snippet),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdTurnOn,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.power),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            app.addToSerialMessageStack(
+                              SerialMessage(
+                                device: SerialKeys.device1,
+                                command: SerialKeys.cmdTurnOff,
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.power_off),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemBuilder: (context, index) =>
+                            Text('${app.messageStack[index]}'),
+                        itemCount: app.messageStack.length,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
