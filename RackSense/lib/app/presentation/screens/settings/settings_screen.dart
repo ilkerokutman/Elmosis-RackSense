@@ -20,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final SerialService _serialService;
   StreamSubscription<Uint8List>? _messageSubscription;
 
+  int? _errorCode;
   int? _deviceStatus;
   bool? _isRunning;
   int? _setTemperature;
@@ -59,6 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final values = data.sublist(3, data.length - 2);
       if (values.length < 10) return;
       setState(() {
+        _errorCode = values[0];
         _deviceStatus = values[1];
         _isRunning = values[1] != 0;
         _setTemperature = values[2].toSigned(8);
@@ -216,7 +218,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Running',
                     _isRunning == null ? null : (_isRunning! ? 'ON' : 'OFF'),
                   ),
-                  const SizedBox(height: 24),
+                  _buildValueRow(
+                    'Error Code',
+                    _errorCode == null
+                        ? null
+                        : '0x${_errorCode!.toRadixString(16).padLeft(2, '0')}',
+                  ),
                 ],
               ),
             ),
