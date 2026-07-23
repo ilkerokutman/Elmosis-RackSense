@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:dart_periphery/dart_periphery.dart';
 import 'package:get/get.dart';
+import 'package:rack_sense/app/core/constants/serial.dart';
 import 'package:rack_sense/app/core/utils/common_utils.dart';
 import 'package:rack_sense/app/data/models/pin_state.dart';
 import 'package:rack_sense/app/data/services/connectivity_service.dart';
@@ -548,7 +549,7 @@ class AppController extends GetxController {
   final RxList<int> _deviceIds = <int>[].obs;
   List<int> get deviceIds => _deviceIds;
   void _initializeDevices() {
-    _deviceIds.assignAll([mainboardId, 0x01, 0x02]);
+    _deviceIds.assignAll([mainboardId, SerialKeys.device1, SerialKeys.device2]);
     update();
   }
   //endregion
@@ -717,8 +718,14 @@ class AppController extends GetxController {
       // await waitForSerialResponse();
 
       // Read inputs
-      await sendSerialMessage(SerialMessage(device: deviceId, command: 0xD2));
+      print('sending msg');
+      await sendSerialMessage(
+        SerialMessage(device: deviceId, command: SerialKeys.cmdReadAll),
+      );
+
+      print('waiting response');
       await waitForSerialResponse();
+      print('waited response');
     }
 
     // Process any queued messages
