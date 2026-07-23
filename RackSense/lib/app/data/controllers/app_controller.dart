@@ -152,6 +152,7 @@ class AppController extends GetxController {
       btn3 = GPIO(27, GPIOdirection.gpioDirIn);
       btn4 = GPIO(22, GPIOdirection.gpioDirIn);
       outPinSER = GPIO(23, GPIOdirection.gpioDirOut);
+      outPinSRCLK = GPIO(24, GPIOdirection.gpioDirOut);
       outPinRCLK = GPIO(25, GPIOdirection.gpioDirOut);
       in1 = GPIO(5, GPIOdirection.gpioDirIn);
       in2 = GPIO(6, GPIOdirection.gpioDirIn);
