@@ -26,12 +26,20 @@ class SettingsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            'Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}',
-                          ),
+                        Text('Loop: ${app.allowSerialLoop ? 'ON' : 'OFF'}'),
+                        IconButton(
+                          onPressed: () {
+                            app.turnOnSerialLoop();
+                          },
+                          icon: Icon(Icons.play_arrow),
                         ),
+                        IconButton(
+                          onPressed: () {
+                            app.turnOffSerialLoop();
+                          },
+                          icon: Icon(Icons.stop),
+                        ),
+                        Spacer(),
                         Text('Stack: ${app.messageStack.length}'),
                       ],
                     ),
