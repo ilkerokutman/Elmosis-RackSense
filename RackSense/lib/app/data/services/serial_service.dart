@@ -92,6 +92,13 @@ class SerialService {
     return kNormalMessageLength;
   }
 
+  /// Time required to clock out [byteCount] 8N1 bytes at [baudRate].
+  static int _frameTransmissionTimeMs(int byteCount, int baudRate) {
+    if (baudRate <= 0) return 10;
+    // 8N1 = start + 8 data + stop = 10 bits per byte.
+    return ((byteCount * 10 * 1000 + baudRate - 1) ~/ baudRate);
+  }
+
   Future<void> sendMessage(
     SerialMessage message, {
     required void Function(bool) setTxEnable,
@@ -107,8 +114,11 @@ class SerialService {
     _handler.clear(); // discard any stale bytes from previous RX windows
 
     final stopwatch = Stopwatch()..start();
+    final txStopwatch = Stopwatch();
     try {
-      // Non-blocking write: push the whole frame into the OS buffer.
+      // Non-blocking write: feed the frame to the OS as fast as it accepts it.
+      // Start the TX timer from the first byte the driver actually accepts,
+      // because the UART begins shifting it out immediately.
       var offset = 0;
       while (offset < bytes.length) {
         final written = _serialPort!.write(
@@ -118,26 +128,28 @@ class SerialService {
           throw SerialPortError('serial write failed');
         }
         if (written == 0) {
+          if (stopwatch.elapsedMilliseconds > 1000) {
+            throw SerialPortError('serial write timeout');
+          }
           await CU.wait(1);
           continue;
+        }
+        if (!txStopwatch.isRunning) {
+          txStopwatch.start();
         }
         offset += written;
       }
 
-      // Wait until the OS/hardware output queue is actually empty, then give
-      // the line a short quiet gap before releasing the bus. drain() blocks
-      // too long and lets the slave start transmitting while we are still in
-      // TX mode, so we poll sp_output_waiting instead.
-      final drainStopwatch = Stopwatch()..start();
-      while (_serialPort!.bytesToWrite > 0) {
-        if (drainStopwatch.elapsedMilliseconds > 1000) {
-          print('serial tx: output buffer drain timeout');
-          break;
-        }
-        await CU.wait(1);
+      // Hold TX for the time it takes to clock every bit out at the current
+      // baud rate, plus a short quiet gap. Don't use drain()/bytesToWrite;
+      // they can return late and keep us in TX mode past the end of the frame.
+      final baudRate = _serialPort!.config.baudRate;
+      final txTimeMs = _frameTransmissionTimeMs(bytes.length, baudRate);
+      final remainingMs = txTimeMs + 2 - txStopwatch.elapsedMilliseconds;
+      if (remainingMs > 0) {
+        print('serial tx: holding TX for ${remainingMs}ms');
+        await CU.wait(remainingMs);
       }
-      await CU.wait(2); // quiet gap after last stop bit
-
       print('serial tx: frame sent in ${stopwatch.elapsedMilliseconds}ms');
     } catch (e) {
       print('serial send error: ${e.toString()}');
