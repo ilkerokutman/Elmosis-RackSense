@@ -143,27 +143,48 @@ class AppController extends GetxController {
 
   Future<void> _initializeGpio() async {
     if (!Platform.isLinux) return;
-
+    print('GPIO init: #0');
     try {
       uartModeTx = GPIO(4, GPIOdirection.gpioDirOut);
+
+      print('GPIO init: #1');
       buzzer = GPIO(0, GPIOdirection.gpioDirOut);
+      print('GPIO init: #2');
       btn1 = GPIO(17, GPIOdirection.gpioDirIn);
+
+      print('GPIO init: #3');
       btn2 = GPIO(18, GPIOdirection.gpioDirIn);
+      print('GPIO init: #4');
       btn3 = GPIO(27, GPIOdirection.gpioDirIn);
+      print('GPIO init: #5');
       btn4 = GPIO(22, GPIOdirection.gpioDirIn);
+      print('GPIO init: #6');
       outPinSER = GPIO(23, GPIOdirection.gpioDirOut);
+      print('GPIO init: #7');
       outPinSRCLK = GPIO(24, GPIOdirection.gpioDirOut);
+      print('GPIO init: #8');
       outPinRCLK = GPIO(25, GPIOdirection.gpioDirOut);
+      print('GPIO init: #9');
       in1 = GPIO(5, GPIOdirection.gpioDirIn);
+      print('GPIO init: #10');
       in2 = GPIO(6, GPIOdirection.gpioDirIn);
+      print('GPIO init: #11');
       in3 = GPIO(12, GPIOdirection.gpioDirIn);
+      print('GPIO init: #12');
       in4 = GPIO(13, GPIOdirection.gpioDirIn);
+      print('GPIO init: #13');
       in5 = GPIO(19, GPIOdirection.gpioDirIn);
+      print('GPIO init: #14');
       in6 = GPIO(16, GPIOdirection.gpioDirIn);
+      print('GPIO init: #15');
       in7 = GPIO(26, GPIOdirection.gpioDirIn);
+      print('GPIO init: #16');
       in8 = GPIO(20, GPIOdirection.gpioDirIn);
+      print('GPIO init: #17');
       txEnablePin = GPIO(21, GPIOdirection.gpioDirOut);
+      print('GPIO init: #18');
       spiAdc = SPI(0, 0, SPImode.mode0, 1000000);
+      print('GPIO init: #19');
     } on Exception catch (e) {
       print('initializeGpio error: ${e.toString()}');
     }
@@ -233,10 +254,13 @@ class AppController extends GetxController {
 
     update();
     await CU.wait(50);
+    print('GPIO init: #20');
 
     await resetOutputs();
+    print('GPIO init: #21');
 
     runGpioInputPolling();
+    print('GPIO init: #22');
   }
 
   Future<void> resetOutputs() async {
