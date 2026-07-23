@@ -113,18 +113,9 @@ class SerialService {
       // Start the TX timer from the first byte the driver actually accepts,
       // because the UART begins shifting it out immediately.
       var offset = 0;
-      var writeAttempts = 0;
       while (offset < bytes.length) {
-        final outBefore = _serialPort!.bytesToWrite;
         final written = _serialPort!.write(
           Uint8List.sublistView(bytes, offset),
-        );
-        writeAttempts++;
-        print(
-          'serial tx: attempt $writeAttempts, offset=$offset, '
-          'written=$written, outQueue=$outBefore, '
-          't=${stopwatch.elapsedMicroseconds}us, '
-          'txT=${txStopwatch.elapsedMicroseconds}us',
         );
         if (written < 0) {
           throw SerialPortError('serial write failed');
@@ -149,27 +140,13 @@ class SerialService {
       final txTimeUs =
           ((bytes.length * 10 * 1000000 + baudRate - 1) ~/ baudRate);
       final gapUs = 3000;
-      final elapsedUs = txStopwatch.elapsedMicroseconds;
-      final remainingUs = txTimeUs + gapUs - elapsedUs;
-      print(
-        'serial tx: write done t=${stopwatch.elapsedMicroseconds}us, '
-        'txT=${txStopwatch.elapsedMicroseconds}us, txTimeUs=$txTimeUs, '
-        'remainingUs=$remainingUs, outQueue=${_serialPort!.bytesToWrite}',
-      );
+      final remainingUs = txTimeUs + gapUs - txStopwatch.elapsedMicroseconds;
       if (remainingUs > 0) {
-        print('serial tx: holding TX for ${remainingUs}us');
         CU.busyWaitMicroseconds(remainingUs);
       }
-      print(
-        'serial tx: hold done t=${stopwatch.elapsedMicroseconds}us, '
-        'txT=${txStopwatch.elapsedMicroseconds}us',
-      );
 
       setTxEnable(true);
-      print(
-        'serial tx: released t=${stopwatch.elapsedMicroseconds}us, '
-        'frame sent in ${stopwatch.elapsedMilliseconds}ms',
-      );
+      print('serial tx: frame sent in ${stopwatch.elapsedMilliseconds}ms');
     } catch (e) {
       print('serial send error: ${e.toString()}');
     }
