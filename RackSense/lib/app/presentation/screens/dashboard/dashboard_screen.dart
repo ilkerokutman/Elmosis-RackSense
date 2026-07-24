@@ -80,6 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: UnitWidget(
                               unitId: SerialKeys.device1,
                               state: controller.unitFor(SerialKeys.device1),
+                              controller: controller,
                             ),
                           ),
                           Expanded(
@@ -87,6 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: UnitWidget(
                               unitId: SerialKeys.device2,
                               state: controller.unitFor(SerialKeys.device2),
+                              controller: controller,
                             ),
                           ),
                         ],

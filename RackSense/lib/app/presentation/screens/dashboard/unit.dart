@@ -1,14 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/data/models/ac_unit_state.dart';
 import 'package:rack_sense/app/presentation/screens/dashboard/ntc_card.dart';
 
 class UnitWidget extends StatelessWidget {
-  const UnitWidget({super.key, required this.unitId, required this.state});
+  const UnitWidget({
+    super.key,
+    required this.unitId,
+    required this.state,
+    required this.controller,
+  });
   final int unitId;
   final AcUnitState state;
+  final AppController controller;
 
   @override
   Widget build(BuildContext context) {
+    final canTurnOn = controller.canTurnOn(state.deviceId);
+    final canTurnOff = controller.canTurnOff(state.deviceId);
+    final isFaulted = state.hasError;
+    final statusColor = isFaulted
+        ? Theme.of(context).colorScheme.error
+        : state.isRunning
+        ? Theme.of(context).colorScheme.primaryContainer
+        : Theme.of(context).colorScheme.outline;
+    final actionLabel = state.isRunning ? 'Turn Off' : 'Turn On';
+    final isAllowed = state.isRunning ? canTurnOff : canTurnOn;
+    final cooldown = controller.cooldownSecondsRemaining(
+      state.deviceId,
+      turningOn: !state.isRunning,
+    );
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(10),
@@ -28,8 +49,17 @@ class UnitWidget extends StatelessWidget {
                     : 'Bekliyor',
               ),
               trailing: IconButton(
-                onPressed: () {},
+                onPressed: isAllowed
+                    ? () {
+                        if (state.isRunning) {
+                          controller.requestTurnOff(state.deviceId);
+                        } else {
+                          controller.requestTurnOn(state.deviceId);
+                        }
+                      }
+                    : null,
                 icon: Icon(Icons.power_settings_new),
+                color: statusColor,
               ),
             ),
             Row(
@@ -81,7 +111,7 @@ class UnitWidget extends StatelessWidget {
                 Expanded(
                   child: NtcCardWidget(
                     label: 'DURUM',
-                    value: state.isRunning ? 'OK' : 'ZZ',
+                    value: state.isRunning ? 'ON' : 'OFF',
                   ),
                 ),
                 Expanded(
