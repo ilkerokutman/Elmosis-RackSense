@@ -45,7 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return AppScaffold(
           selectedIndex: 0,
           title: 'RackSense: Control',
-          body: Padding(
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

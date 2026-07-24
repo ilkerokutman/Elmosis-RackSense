@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rack_sense/app/core/extensions/scroll.dart';
 import 'package:rack_sense/app/core/routes/pages.dart';
 import 'package:rack_sense/app/core/routes/routes.dart';
 import 'package:rack_sense/app/core/themes/theme.dart';
@@ -21,6 +22,7 @@ class MainApp extends StatelessWidget {
 
     return GetX<SettingsController>(
       builder: (settingsController) => GetMaterialApp(
+        scrollBehavior: PiScrollBehavior(),
         debugShowCheckedModeBanner: false,
         getPages: getPages,
         initialRoute: Routes.dashboard,
