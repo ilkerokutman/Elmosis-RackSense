@@ -10,6 +10,7 @@ import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/data/models/ac_unit_state.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
 import 'package:rack_sense/app/presentation/screens/dashboard/alarm_card.dart';
+import 'package:rack_sense/app/presentation/screens/dashboard/unit.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -76,16 +77,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           Expanded(
                             flex: 1,
-                            child: Container(
-                              color: Colors.purple,
-                              //unit A
+                            child: UnitWidget(
+                              unitId: SerialKeys.device1,
+                              state: controller.unitFor(SerialKeys.device1),
                             ),
                           ),
                           Expanded(
                             flex: 1,
-                            child: Container(
-                              color: Colors.green,
-                              //unit B
+                            child: UnitWidget(
+                              unitId: SerialKeys.device2,
+                              state: controller.unitFor(SerialKeys.device2),
                             ),
                           ),
                         ],
