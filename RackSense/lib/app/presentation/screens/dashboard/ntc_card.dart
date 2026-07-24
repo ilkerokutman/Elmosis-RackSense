@@ -12,7 +12,7 @@ class NtcCardWidget extends StatelessWidget {
     return Card(
       margin: EdgeInsets.all(2),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(10),
+        borderRadius: BorderRadiusGeometry.circular(8),
         side: BorderSide(color: scheme.secondaryContainer),
       ),
       child: Container(

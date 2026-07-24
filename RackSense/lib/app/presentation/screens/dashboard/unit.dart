@@ -19,12 +19,21 @@ class UnitWidget extends StatelessWidget {
     final canTurnOn = controller.canTurnOn(state.deviceId);
     final canTurnOff = controller.canTurnOff(state.deviceId);
     final isFaulted = state.hasError;
-    final statusColor = isFaulted
-        ? Theme.of(context).colorScheme.error
+    final statusBgColor = isFaulted
+        ? Theme.of(context).colorScheme.errorContainer
         : state.isRunning
         ? Theme.of(context).colorScheme.primaryContainer
         : Theme.of(context).colorScheme.outline;
-    final actionLabel = state.isRunning ? 'Turn Off' : 'Turn On';
+    final statusColor = isFaulted
+        ? Theme.of(context).colorScheme.onErrorContainer
+        : state.isRunning
+        ? Theme.of(context).colorScheme.onPrimary
+        : Theme.of(context).colorScheme.primary;
+    final actionLabel = state.communicationFailureStartedAt != null
+        ? 'Haberleşme hatası'
+        : state.isRunning
+        ? 'Çalışıyor'
+        : 'Bekliyor';
     final isAllowed = state.isRunning ? canTurnOff : canTurnOn;
     final cooldown = controller.cooldownSecondsRemaining(
       state.deviceId,
@@ -32,7 +41,7 @@ class UnitWidget extends StatelessWidget {
     );
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(10),
+        borderRadius: BorderRadiusGeometry.circular(8),
       ),
       margin: EdgeInsets.all(2),
       child: Container(
@@ -40,13 +49,10 @@ class UnitWidget extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
+              dense: true,
               title: Text('Klima #$unitId'),
               subtitle: Text(
-                state.communicationFailureStartedAt != null
-                    ? 'Haberleşme hatası'
-                    : state.status == 0x01
-                    ? 'Çalışıyor'
-                    : 'Bekliyor',
+                cooldown > 0 ? '$cooldown saniye bekleyin' : actionLabel,
               ),
               trailing: IconButton(
                 onPressed: isAllowed
@@ -58,8 +64,8 @@ class UnitWidget extends StatelessWidget {
                         }
                       }
                     : null,
-                icon: Icon(Icons.power_settings_new),
-                color: statusColor,
+                icon: Icon(Icons.power_settings_new, color: statusColor),
+                color: statusBgColor,
               ),
             ),
             Row(

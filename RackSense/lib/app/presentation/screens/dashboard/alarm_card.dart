@@ -15,7 +15,7 @@ class AlarmCardWidget extends StatelessWidget {
           color: value ? scheme.error : scheme.primary,
           width: 2,
         ),
-        borderRadius: BorderRadiusGeometry.circular(10),
+        borderRadius: BorderRadiusGeometry.circular(8),
       ),
       color: value ? scheme.errorContainer : scheme.primaryContainer,
       child: Container(
