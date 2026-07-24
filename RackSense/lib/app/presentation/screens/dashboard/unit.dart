@@ -30,16 +30,28 @@ class UnitWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: NtcCardWidget(label: 'NTC 1', value: '${state.ntc0}°'),
+                  child: NtcCardWidget(
+                    label: 'NTC 1',
+                    value: state.ntc0 == null ? '-' : '${state.ntc0}°',
+                  ),
                 ),
                 Expanded(
-                  child: NtcCardWidget(label: 'NTC 2', value: '${state.ntc1}°'),
+                  child: NtcCardWidget(
+                    label: 'NTC 2',
+                    value: state.ntc1 == null ? '-' : '${state.ntc1}°',
+                  ),
                 ),
                 Expanded(
-                  child: NtcCardWidget(label: 'NTC 3', value: '${state.ntc2}°'),
+                  child: NtcCardWidget(
+                    label: 'NTC 3',
+                    value: state.ntc2 == null ? '-' : '${state.ntc2}°',
+                  ),
                 ),
                 Expanded(
-                  child: NtcCardWidget(label: 'NTC 4', value: '${state.ntc3}°'),
+                  child: NtcCardWidget(
+                    label: 'NTC 4',
+                    value: state.ntc3 == null ? '-' : '${state.ntc3}°',
+                  ),
                 ),
               ],
             ),
@@ -49,13 +61,15 @@ class UnitWidget extends StatelessWidget {
                 Expanded(
                   child: NtcCardWidget(
                     label: 'SET',
-                    value: '${state.targetTemperature}°',
+                    value: state.targetTemperature == null
+                        ? '-'
+                        : '${state.targetTemperature}°',
                   ),
                 ),
                 Expanded(
                   child: NtcCardWidget(
                     label: 'FAN',
-                    value: '${state.fanLevel}',
+                    value: state.fanLevel == null ? '-' : '${state.fanLevel}',
                   ),
                 ),
                 Expanded(
