@@ -29,10 +29,18 @@ class UnitWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                NtcCardWidget(index: 1, value: state.ntc0?.toDouble()),
-                NtcCardWidget(index: 2, value: state.ntc1?.toDouble()),
-                NtcCardWidget(index: 2, value: state.ntc2?.toDouble()),
-                NtcCardWidget(index: 3, value: state.ntc3?.toDouble()),
+                Expanded(
+                  child: NtcCardWidget(index: 1, value: state.ntc0?.toDouble()),
+                ),
+                Expanded(
+                  child: NtcCardWidget(index: 2, value: state.ntc1?.toDouble()),
+                ),
+                Expanded(
+                  child: NtcCardWidget(index: 2, value: state.ntc2?.toDouble()),
+                ),
+                Expanded(
+                  child: NtcCardWidget(index: 3, value: state.ntc3?.toDouble()),
+                ),
               ],
             ),
             Text('other values'),
