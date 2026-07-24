@@ -92,6 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               Container(
                 color: Colors.yellow,
+                child: Text('test'),
                 // footercards
               ),
             ],
