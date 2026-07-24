@@ -27,6 +27,7 @@ class UnitWidget extends StatelessWidget {
               ),
             ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 NtcCardWidget(index: 1, value: state.ntc0?.toDouble()),
                 NtcCardWidget(index: 2, value: state.ntc1?.toDouble()),

@@ -96,7 +96,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
