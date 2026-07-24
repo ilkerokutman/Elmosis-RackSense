@@ -95,22 +95,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               Container(
-                // footercards
-                color: Colors.yellow,
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children:
-                      // alarm input list with realtime values here
-                      // map the list to AlarmCardWidget()
-                      alarmController.alarms
-                          .map(
-                            (e) => AlarmCardWidget(
-                              label: e.config.label,
-                              value: e.isActive,
-                            ),
-                          )
-                          .toList(),
+                  children: alarmController.alarms
+                      .map(
+                        (e) => Expanded(
+                          child: AlarmCardWidget(
+                            label: e.config.label,
+                            value: e.isActive,
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ],
