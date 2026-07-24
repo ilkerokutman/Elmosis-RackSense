@@ -30,20 +30,50 @@ class UnitWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: NtcCardWidget(index: 1, value: state.ntc0?.toDouble()),
+                  child: NtcCardWidget(label: 'NTC 1', value: '${state.ntc0}°'),
                 ),
                 Expanded(
-                  child: NtcCardWidget(index: 2, value: state.ntc1?.toDouble()),
+                  child: NtcCardWidget(label: 'NTC 2', value: '${state.ntc1}°'),
                 ),
                 Expanded(
-                  child: NtcCardWidget(index: 2, value: state.ntc2?.toDouble()),
+                  child: NtcCardWidget(label: 'NTC 3', value: '${state.ntc2}°'),
                 ),
                 Expanded(
-                  child: NtcCardWidget(index: 3, value: state.ntc3?.toDouble()),
+                  child: NtcCardWidget(label: 'NTC 4', value: '${state.ntc3}°'),
                 ),
               ],
             ),
-            Text('other values'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: NtcCardWidget(
+                    label: 'SET',
+                    value: '${state.targetTemperature}°',
+                  ),
+                ),
+                Expanded(
+                  child: NtcCardWidget(
+                    label: 'FAN',
+                    value: '${state.fanLevel}',
+                  ),
+                ),
+                Expanded(
+                  child: NtcCardWidget(
+                    label: 'DURUM',
+                    value: state.isRunning ? 'OK' : 'ZZ',
+                  ),
+                ),
+                Expanded(
+                  child: NtcCardWidget(
+                    label: 'HATA',
+                    value: state.errorCode == 0x00
+                        ? '---'
+                        : state.errorCode.toString(),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

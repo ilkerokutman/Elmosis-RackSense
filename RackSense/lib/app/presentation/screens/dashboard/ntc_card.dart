@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class NtcCardWidget extends StatelessWidget {
-  const NtcCardWidget({super.key, required this.index, this.value});
-  final int index;
-  final double? value;
+  const NtcCardWidget({super.key, required this.label, this.value});
+  final String label;
+  final String? value;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Card(
-      margin: EdgeInsets.all(1),
+      margin: EdgeInsets.all(2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(10),
         side: BorderSide(color: scheme.secondaryContainer),
@@ -20,15 +20,18 @@ class NtcCardWidget extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'NTC $index',
-              textAlign: TextAlign.start,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall,
+            Opacity(
+              opacity: 0.7,
+              child: Text(
+                label,
+                textAlign: TextAlign.start,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall,
+              ),
             ),
             Text(
-              value == null ? '---' : '${value?.toStringAsFixed(0)}°',
+              value == null ? '---' : '$value',
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
