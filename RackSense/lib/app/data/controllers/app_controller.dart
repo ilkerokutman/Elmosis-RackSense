@@ -976,14 +976,16 @@ class AppController extends GetxController {
   void _evaluateAutomation(AcUnitState unit) {
     final now = DateTime.now();
     final failureStartedAt = unit.hasError ? unit.failureStartedAt : null;
+    final backupDeviceId = unit.deviceId == SerialKeys.device1
+        ? SerialKeys.device2
+        : SerialKeys.device1;
     if (failureStartedAt != null &&
         now.difference(failureStartedAt) >= const Duration(seconds: 15) &&
-        !_handledFailureDevices.contains(unit.deviceId)) {
+        !_handledFailureDevices.contains(unit.deviceId) &&
+        canTurnOff(unit.deviceId) &&
+        canTurnOn(backupDeviceId)) {
       _handledFailureDevices.add(unit.deviceId);
       requestTurnOff(unit.deviceId, isAutomatic: true);
-      final backupDeviceId = unit.deviceId == SerialKeys.device1
-          ? SerialKeys.device2
-          : SerialKeys.device1;
       requestTurnOn(backupDeviceId, isAutomatic: true);
     }
     if (!unit.hasError) {
@@ -999,10 +1001,10 @@ class AppController extends GetxController {
         .where((item) => item.isRunning)
         .firstOrNull;
     if (runningUnit == null) return;
-    final backupDeviceId = runningUnit.deviceId == SerialKeys.device1
+    final rotationDeviceId = runningUnit.deviceId == SerialKeys.device1
         ? SerialKeys.device2
         : SerialKeys.device1;
-    requestTurnOn(backupDeviceId, isAutomatic: true);
+    requestTurnOn(rotationDeviceId, isAutomatic: true);
     _nextAutoSwitchAt = now.add(const Duration(hours: 4));
     update();
   }
@@ -1173,13 +1175,15 @@ class AppController extends GetxController {
     );
     _units[deviceId] = updated;
     final startedAt = updated.communicationFailureStartedAt!;
+    final backupDeviceId = deviceId == SerialKeys.device1
+        ? SerialKeys.device2
+        : SerialKeys.device1;
     if (now.difference(startedAt) >= const Duration(seconds: 15) &&
-        !_handledFailureDevices.contains(deviceId)) {
+        !_handledFailureDevices.contains(deviceId) &&
+        canTurnOff(deviceId) &&
+        canTurnOn(backupDeviceId)) {
       _handledFailureDevices.add(deviceId);
       requestTurnOff(deviceId, isAutomatic: true);
-      final backupDeviceId = deviceId == SerialKeys.device1
-          ? SerialKeys.device2
-          : SerialKeys.device1;
       requestTurnOn(backupDeviceId, isAutomatic: true);
     }
   }
