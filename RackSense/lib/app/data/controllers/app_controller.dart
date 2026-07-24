@@ -173,7 +173,7 @@ class AppController extends GetxController {
   }
 
   void requestTurnOn(int deviceId, {bool isAutomatic = false}) {
-    if (!canTurnOn(deviceId)) return;
+    if (unitFor(deviceId).isRunning || !canTurnOn(deviceId)) return;
     if (!isAutomatic) setAutoMode(false);
     final otherDeviceId = deviceId == SerialKeys.device1
         ? SerialKeys.device2
