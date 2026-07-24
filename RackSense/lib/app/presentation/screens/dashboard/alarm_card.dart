@@ -27,6 +27,8 @@ class AlarmCardWidget extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelLarge?.copyWith(
                 color: value
                     ? scheme.onErrorContainer
@@ -35,6 +37,8 @@ class AlarmCardWidget extends StatelessWidget {
             ),
             Text(
               value ? 'ALARM' : 'YOK/KAPALI',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: value
