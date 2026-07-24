@@ -17,27 +17,27 @@ class AppSettings {
   static const List<AlarmInputConfig> _defaultAlarmInputs = [
     AlarmInputConfig(
       key: 'smoke',
-      label: 'Smoke',
+      label: 'Duman',
       input: MainboardInput.input1,
     ),
     AlarmInputConfig(
       key: 'water_leak',
-      label: 'Water Leak',
+      label: 'Su Kaçağı',
       input: MainboardInput.input2,
     ),
     AlarmInputConfig(
       key: 'front_door',
-      label: 'Front Door Open',
+      label: 'Ön Kapı',
       input: MainboardInput.input3,
     ),
     AlarmInputConfig(
       key: 'rear_door',
-      label: 'Rear Door Open',
+      label: 'Arka Kapı',
       input: MainboardInput.input4,
     ),
     AlarmInputConfig(
       key: 'service_door',
-      label: 'Service Door Open',
+      label: 'Servis Kapısı',
       input: MainboardInput.input5,
     ),
   ];
