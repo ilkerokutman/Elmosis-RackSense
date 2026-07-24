@@ -6,8 +6,12 @@ import 'dart:typed_data';
 import 'package:dart_periphery/dart_periphery.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/constants/serial.dart';
+import 'package:rack_sense/app/core/routes/routes.dart';
 import 'package:rack_sense/app/core/utils/common_utils.dart';
+import 'package:rack_sense/app/data/models/ac_unit_state.dart';
+import 'package:rack_sense/app/data/models/mainboard_input.dart';
 import 'package:rack_sense/app/data/models/pin_state.dart';
+import 'package:rack_sense/app/data/repositories/telemetry_repository.dart';
 import 'package:rack_sense/app/data/services/connectivity_service.dart';
 import 'package:rack_sense/app/data/services/serial_service.dart';
 
@@ -20,6 +24,7 @@ const int one = 0x01;
 class AppController extends GetxController {
   late final ConnectivityService _connectivityService;
   late final SerialService _serialService;
+  late final TelemetryRepository _telemetryRepository;
   GPIO? uartModeTx;
   GPIO? btn1;
   GPIO? btn2;
@@ -42,11 +47,188 @@ class AppController extends GetxController {
 
   StreamSubscription<Uint8List>? _serialMessageSubscription;
 
+  final RxMap<int, AcUnitState> _units = <int, AcUnitState>{
+    SerialKeys.device1: const AcUnitState(deviceId: SerialKeys.device1),
+    SerialKeys.device2: const AcUnitState(deviceId: SerialKeys.device2),
+  }.obs;
+  final RxBool _isAutoMode = false.obs;
+  final RxInt _desiredTemperature = 23.obs;
+  final RxInt _inputRevision = 0.obs;
+  final RxBool _cabinetShutdownBlocked = false.obs;
+  final Set<int> _handledFailureDevices = <int>{};
+  bool _isBuzzerPatternRunning = false;
+
+  DateTime? _nextAutoSwitchAt;
+
+  Map<int, AcUnitState> get units => Map.unmodifiable(_units);
+  bool get isAutoMode => _isAutoMode.value;
+  int get desiredTemperature => _desiredTemperature.value;
+  RxInt get inputRevisionRx => _inputRevision;
+  bool get isCabinetShutdownBlocked => _cabinetShutdownBlocked.value;
+  DateTime? get nextAutoSwitchAt => _nextAutoSwitchAt;
+  AcUnitState unitFor(int deviceId) =>
+      _units[deviceId] ?? AcUnitState(deviceId: deviceId);
+
+  bool canTurnOn(int deviceId) {
+    if (isCabinetShutdownBlocked) return false;
+    final unit = unitFor(deviceId);
+    return unit.lastTurnedOffAt == null ||
+        DateTime.now().difference(unit.lastTurnedOffAt!) >=
+            const Duration(seconds: 15);
+  }
+
+  bool canTurnOff(int deviceId) {
+    final unit = unitFor(deviceId);
+    return unit.lastTurnedOnAt == null ||
+        DateTime.now().difference(unit.lastTurnedOnAt!) >=
+            const Duration(seconds: 15);
+  }
+
+  int cooldownSecondsRemaining(int deviceId, {required bool turningOn}) {
+    final timestamp = turningOn
+        ? unitFor(deviceId).lastTurnedOffAt
+        : unitFor(deviceId).lastTurnedOnAt;
+    if (timestamp == null) return 0;
+    final remaining =
+        const Duration(seconds: 15) - DateTime.now().difference(timestamp);
+    return remaining.isNegative ? 0 : remaining.inSeconds + 1;
+  }
+
+  void setCabinetShutdownBlocked(bool value) {
+    _cabinetShutdownBlocked.value = value;
+    update();
+  }
+
+  bool inputStatus(MainboardInput input) {
+    for (final pinState in pinStates) {
+      if (pinState.device == mainboardId &&
+          pinState.type == PinType.digitalInput &&
+          pinState.number == input.number) {
+        return pinState.status;
+      }
+    }
+    return false;
+  }
+
+  Future<void> soundTap() async {
+    if (_isBuzzerPatternRunning || buzzer == null) return;
+    _isBuzzerPatternRunning = true;
+    try {
+      buzzer!.write(true);
+      _buzzerState.value = true;
+      await CU.wait(100);
+    } finally {
+      buzzer?.write(false);
+      _buzzerState.value = false;
+      _isBuzzerPatternRunning = false;
+      update();
+    }
+  }
+
+  Future<void> soundError() async {
+    if (_isBuzzerPatternRunning || buzzer == null) return;
+    _isBuzzerPatternRunning = true;
+    try {
+      for (var index = 0; index < 3; index++) {
+        buzzer!.write(true);
+        _buzzerState.value = true;
+        await CU.wait(1000);
+        buzzer!.write(false);
+        _buzzerState.value = false;
+        if (index < 2) await CU.wait(1000);
+      }
+    } finally {
+      buzzer?.write(false);
+      _buzzerState.value = false;
+      _isBuzzerPatternRunning = false;
+      update();
+    }
+  }
+
+  void setAutoMode(bool enabled) {
+    _isAutoMode.value = enabled;
+    _nextAutoSwitchAt = enabled
+        ? DateTime.now().add(const Duration(hours: 4))
+        : null;
+    update();
+  }
+
+  void setDesiredTemperature(int value) {
+    if (value < 16 || value > 30) return;
+    _desiredTemperature.value = value;
+    setAutoMode(false);
+    final runningUnit = units.values
+        .where((unit) => unit.isRunning)
+        .firstOrNull;
+    if (runningUnit != null && runningUnit.targetTemperature != value) {
+      addToSerialMessageStack(
+        SerialMessage(
+          device: runningUnit.deviceId,
+          command: SerialKeys.cmdSetValue,
+          arg: value & 0xFF,
+        ),
+      );
+    }
+    update();
+  }
+
+  void requestTurnOn(int deviceId, {bool isAutomatic = false}) {
+    if (!canTurnOn(deviceId)) return;
+    if (!isAutomatic) setAutoMode(false);
+    final otherDeviceId = deviceId == SerialKeys.device1
+        ? SerialKeys.device2
+        : SerialKeys.device1;
+    final otherUnit = unitFor(otherDeviceId);
+    if (otherUnit.isRunning) {
+      if (!canTurnOff(otherDeviceId)) return;
+      addToSerialMessageStack(
+        SerialMessage(device: otherDeviceId, command: SerialKeys.cmdTurnOff),
+      );
+    }
+    addToSerialMessageStack(
+      SerialMessage(device: deviceId, command: SerialKeys.cmdTurnOn),
+    );
+    final targetUnit = unitFor(deviceId);
+    if (targetUnit.targetTemperature != desiredTemperature) {
+      addToSerialMessageStack(
+        SerialMessage(
+          device: deviceId,
+          command: SerialKeys.cmdSetValue,
+          arg: desiredTemperature & 0xFF,
+        ),
+      );
+    }
+  }
+
+  void requestTurnOff(
+    int deviceId, {
+    bool force = false,
+    bool isAutomatic = false,
+  }) {
+    if (!force && !canTurnOff(deviceId)) return;
+    if (!isAutomatic) setAutoMode(false);
+    addToSerialMessageStack(
+      SerialMessage(device: deviceId, command: SerialKeys.cmdTurnOff),
+    );
+  }
+
+  void requestStopAll({bool force = false}) {
+    setAutoMode(false);
+    for (final deviceId in [SerialKeys.device1, SerialKeys.device2]) {
+      if (force || canTurnOff(deviceId)) {
+        addToSerialMessageStack(
+          SerialMessage(device: deviceId, command: SerialKeys.cmdTurnOff),
+        );
+      }
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
     _connectivityService = Get.find<ConnectivityService>();
     _serialService = Get.find<SerialService>();
+    _telemetryRepository = TelemetryRepository(Get.find());
 
     _syncInitialValues();
     _setupEverListeners();
@@ -383,6 +565,11 @@ class AppController extends GetxController {
         if (item.status != newStatus) {
           item.status = newStatus;
           updatePinState(item);
+          if (item.type == PinType.digitalInput) {
+            _inputRevision.value++;
+          } else if (item.type == PinType.buttonInput && newStatus) {
+            unawaited(_navigateForButton(item.number));
+          }
           final String typeLabel = item.type == PinType.buttonInput
               ? 'Button'
               : 'Input';
@@ -395,6 +582,19 @@ class AppController extends GetxController {
     }
     update();
     Future.delayed(Duration(milliseconds: 100), () => runGpioInputPolling());
+  }
+
+  Future<void> _navigateForButton(int number) async {
+    final route = switch (number) {
+      1 => Routes.dashboard,
+      2 => Routes.monitor,
+      3 => Routes.alarm,
+      4 => Routes.camera,
+      _ => null,
+    };
+    if (route == null || Get.currentRoute == route) return;
+    await soundTap();
+    Get.offAllNamed(route);
   }
 
   void pollNtcSensors() {
@@ -549,10 +749,7 @@ class AppController extends GetxController {
   final RxList<int> _deviceIds = <int>[].obs;
   List<int> get deviceIds => _deviceIds;
   void _initializeDevices() {
-    _deviceIds.assignAll([
-      mainboardId, SerialKeys.device1,
-      // , SerialKeys.device2
-    ]);
+    _deviceIds.assignAll([mainboardId, SerialKeys.device1, SerialKeys.device2]);
     update();
   }
   //endregion
@@ -711,10 +908,103 @@ class AppController extends GetxController {
       case SerialKeys.cmdReadFanLevel:
         print('Read Fan Level: ${args.toSigned(8)}');
       case SerialKeys.cmdReadAll:
+        _updateUnitFromReadAll(deviceId, data);
         _printReadAllValues(data);
       default:
         print('unknown serial command received');
     }
+  }
+
+  void _updateUnitFromReadAll(int deviceId, List<int> data) {
+    if (data.length != kReadAllMessageLength) return;
+    final values = data.sublist(3, data.length - 2);
+    if (values.length < 10) return;
+
+    final previous = unitFor(deviceId);
+    final now = DateTime.now();
+    final isRunning = values[1] != 0;
+    final hasError = values[0] != 0;
+    final updated = previous.copyWith(
+      errorCode: values[0],
+      status: values[1],
+      targetTemperature: values[2].toSigned(8),
+      ntc0: values[3].toSigned(8),
+      ntc1: values[4].toSigned(8),
+      ntc2: values[5].toSigned(8),
+      ntc3: values[6].toSigned(8),
+      fanLevel: values[9].toSigned(8),
+      isRunning: isRunning,
+      lastResponseAt: now,
+      lastTurnedOnAt: !previous.isRunning && isRunning
+          ? now
+          : previous.lastTurnedOnAt,
+      lastTurnedOffAt: previous.isRunning && !isRunning
+          ? now
+          : previous.lastTurnedOffAt,
+      failureStartedAt: hasError ? previous.failureStartedAt ?? now : null,
+      clearFailureStartedAt: !hasError,
+      clearCommunicationFailureStartedAt: true,
+    );
+    _units[deviceId] = updated;
+    _evaluateAutomation(updated);
+
+    if (previous.isRunning != isRunning) {
+      unawaited(
+        _telemetryRepository.recordRuntimeEvent(
+          deviceId: deviceId,
+          eventType: isRunning ? 'turned_on' : 'turned_off',
+          reason: 'device_status',
+          occurredAt: now,
+        ),
+      );
+    }
+    if (previous.errorCode != values[0]) {
+      unawaited(
+        _telemetryRepository.recordChange(
+          sourceType: 'unit',
+          sourceId: deviceId.toString(),
+          metric: 'error_code',
+          previousValue: previous.errorCode.toString(),
+          newValue: values[0].toString(),
+          occurredAt: now,
+        ),
+      );
+    }
+    update();
+  }
+
+  void _evaluateAutomation(AcUnitState unit) {
+    final now = DateTime.now();
+    final failureStartedAt = unit.hasError ? unit.failureStartedAt : null;
+    if (failureStartedAt != null &&
+        now.difference(failureStartedAt) >= const Duration(seconds: 15) &&
+        !_handledFailureDevices.contains(unit.deviceId)) {
+      _handledFailureDevices.add(unit.deviceId);
+      requestTurnOff(unit.deviceId, isAutomatic: true);
+      final backupDeviceId = unit.deviceId == SerialKeys.device1
+          ? SerialKeys.device2
+          : SerialKeys.device1;
+      requestTurnOn(backupDeviceId, isAutomatic: true);
+    }
+    if (!unit.hasError) {
+      _handledFailureDevices.remove(unit.deviceId);
+    }
+
+    if (!isAutoMode ||
+        _nextAutoSwitchAt == null ||
+        now.isBefore(_nextAutoSwitchAt!)) {
+      return;
+    }
+    final runningUnit = units.values
+        .where((item) => item.isRunning)
+        .firstOrNull;
+    if (runningUnit == null) return;
+    final backupDeviceId = runningUnit.deviceId == SerialKeys.device1
+        ? SerialKeys.device2
+        : SerialKeys.device1;
+    requestTurnOn(backupDeviceId, isAutomatic: true);
+    _nextAutoSwitchAt = now.add(const Duration(hours: 4));
+    update();
   }
 
   void _printReadAllValues(List<int> data) {
@@ -866,12 +1156,34 @@ class AppController extends GetxController {
       await CU.wait(1);
       if (timeoutMillis >= maxTimeout) {
         print('ERROR: Serial response timeout');
+        _markCommunicationTimeout(currentSerialMessage!.device);
         _currentSerialMessage.value = null;
         update();
         return;
       }
     }
   }
+
+  void _markCommunicationTimeout(int deviceId) {
+    final previous = unitFor(deviceId);
+    final now = DateTime.now();
+    final updated = previous.copyWith(
+      communicationFailureStartedAt:
+          previous.communicationFailureStartedAt ?? now,
+    );
+    _units[deviceId] = updated;
+    final startedAt = updated.communicationFailureStartedAt!;
+    if (now.difference(startedAt) >= const Duration(seconds: 15) &&
+        !_handledFailureDevices.contains(deviceId)) {
+      _handledFailureDevices.add(deviceId);
+      requestTurnOff(deviceId, isAutomatic: true);
+      final backupDeviceId = deviceId == SerialKeys.device1
+          ? SerialKeys.device2
+          : SerialKeys.device1;
+      requestTurnOn(backupDeviceId, isAutomatic: true);
+    }
+  }
+
   //endregion
 
   //region MARK: UI State

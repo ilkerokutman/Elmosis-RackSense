@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';

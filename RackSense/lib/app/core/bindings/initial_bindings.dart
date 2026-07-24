@@ -1,14 +1,24 @@
 import 'package:get/get.dart';
+import 'package:rack_sense/app/data/controllers/alarm_controller.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
+import 'package:rack_sense/app/data/controllers/settings_controller.dart';
 import 'package:rack_sense/app/data/services/connectivity_service.dart';
 import 'package:rack_sense/app/data/services/database_service.dart';
 import 'package:rack_sense/app/data/services/serial_service.dart';
+import 'package:rack_sense/app/data/services/settings_service.dart';
+import 'package:get_storage/get_storage.dart';
 
 class InitialBindings extends Bindings {
   @override
   Future<void> dependencies() async {
+    await GetStorage.init();
+
     print("Dependency Injection: Starting Database Service init");
     await Get.putAsync(() async => DatabaseService(), permanent: true);
+    await Get.putAsync(
+      () async => SettingsService(GetStorage()).initialize(),
+      permanent: true,
+    );
     print("Dependency Injection: Database Service initialized");
 
     // TODO: ApiProvider
@@ -38,8 +48,11 @@ class InitialBindings extends Bindings {
     // Get.find<MainController>().initializeAcUnitList();
     // print("Dependency Injection: MAIN init completed");
 
+    await Get.putAsync(() async => SettingsController(), permanent: true);
+
     print("Dependency Injection: Starting APP init");
     await Get.putAsync(() async => AppController(), permanent: true);
+    await Get.putAsync(() async => AlarmController(), permanent: true);
     print("Dependency Injection: APP init completed");
   }
 }

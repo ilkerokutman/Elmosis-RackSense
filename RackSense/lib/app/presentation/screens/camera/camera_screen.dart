@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
@@ -83,8 +82,8 @@ class CameraScreen extends StatelessWidget {
                         ListView.builder(
                           itemBuilder: (context, index) => ListTile(
                             title: Text(
-                             'NA',
-                             // app.securitySwitchList[index].title,
+                              'NA',
+                              // app.securitySwitchList[index].title,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                             trailing:
@@ -94,13 +93,13 @@ class CameraScreen extends StatelessWidget {
                                 //     color: Colors.redAccent,
                                 //   )
                                 // :
-                                 Icon(
-                                    Icons.check_circle,
-                                    color: Colors.lightGreen,
-                                  ),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.lightGreen,
+                                ),
                           ),
                           shrinkWrap: true,
-                          itemCount:0// app.securitySwitchList.length,
+                          itemCount: 0, // app.securitySwitchList.length,
                         ),
                       ],
                     ),

@@ -106,50 +106,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  Future<void> _changeSetTemperature(int delta) async {
+  void _changeSetTemperature(int delta) {
     if (_isSetTempBusy) return;
-    final newValue = ((_setTemperature ?? 25) + delta).clamp(-128, 127);
-    setState(() {
-      _setTemperature = newValue;
-      _isSetTempBusy = true;
-    });
+    final newValue = ((_setTemperature ?? 25) + delta).clamp(16, 30);
+    setState(() => _setTemperature = newValue);
+    _appController.setDesiredTemperature(newValue);
+  }
 
-    await _appController.sendSerialMessage(
-      SerialMessage(
-        device: SerialKeys.device1,
-        command: SerialKeys.cmdSetValue,
-        arg: newValue & 0xFF,
-      ),
-    );
-    await _appController.waitForSerialResponse();
-
-    if (mounted) {
-      setState(() => _isSetTempBusy = false);
+  void _toggleOnOff(bool turnOn) {
+    if (_isOnOffBusy) return;
+    if (turnOn) {
+      _appController.requestTurnOn(SerialKeys.device1);
+    } else {
+      _appController.requestTurnOff(SerialKeys.device1);
     }
   }
 
-  Future<void> _toggleOnOff(bool turnOn) async {
-    if (_isOnOffBusy || !mounted) return;
-    setState(() => _isOnOffBusy = true);
-
-    await _appController.sendSerialMessage(
-      SerialMessage(
-        device: SerialKeys.device1,
-        command: turnOn ? SerialKeys.cmdTurnOn : SerialKeys.cmdTurnOff,
-      ),
-    );
-    await _appController.waitForSerialResponse();
-
-    if (mounted) {
-      setState(() => _isOnOffBusy = false);
-    }
-  }
-
-  Future<void> _refresh() async {
-    await _appController.sendSerialMessage(
+  void _refresh() {
+    _appController.addToSerialMessageStack(
       SerialMessage(device: SerialKeys.device1, command: SerialKeys.cmdReadAll),
     );
-    await _appController.waitForSerialResponse();
   }
 
   Widget _buildValueRow(String label, String? value) {
