@@ -51,22 +51,28 @@ class UnitWidget extends StatelessWidget {
             ListTile(
               dense: true,
               title: Text('Klima #$unitId'),
-              subtitle: Text(
-                cooldown > 0 ? '$cooldown saniye bekleyin' : actionLabel,
-              ),
-              trailing: IconButton(
-                onPressed: isAllowed
-                    ? () {
-                        if (state.isRunning) {
-                          controller.requestTurnOff(state.deviceId);
-                        } else {
-                          controller.requestTurnOn(state.deviceId);
-                        }
-                      }
-                    : null,
-                icon: Icon(Icons.power_settings_new, color: statusColor),
-                color: statusBgColor,
-              ),
+              subtitle: Text(actionLabel),
+              trailing: cooldown > 0
+                  ? SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        value: 1 - (cooldown / 15),
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: isAllowed
+                          ? () {
+                              if (state.isRunning) {
+                                controller.requestTurnOff(state.deviceId);
+                              } else {
+                                controller.requestTurnOn(state.deviceId);
+                              }
+                            }
+                          : null,
+                      icon: Icon(Icons.power_settings_new, color: statusColor),
+                      color: statusBgColor,
+                    ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
