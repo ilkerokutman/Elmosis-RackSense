@@ -1210,5 +1210,6 @@ class AppController extends GetxController {
     print('UART TX Invert: ${_invertUartTx.value}');
     update();
   }
+
   //endregion
 }

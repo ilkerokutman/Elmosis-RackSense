@@ -5,9 +5,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/constants/serial.dart';
+import 'package:rack_sense/app/data/controllers/alarm_controller.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/data/models/ac_unit_state.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
+import 'package:rack_sense/app/presentation/screens/dashboard/alarm_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -44,6 +46,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (controller) {
         final targetTemperature =
             _pendingTemperature ?? controller.desiredTemperature;
+
+        final alarmController = Get.find<AlarmController>();
         return AppScaffold(
           selectedIndex: 0,
           title: 'RackSense: Control',
@@ -91,9 +95,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               Container(
-                color: Colors.yellow,
-                child: Text('test'),
                 // footercards
+                color: Colors.yellow,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children:
+                      // alarm input list with realtime values here
+                      // map the list to AlarmCardWidget()
+                      alarmController.alarms
+                          .map(
+                            (e) => AlarmCardWidget(
+                              label: e.config.label,
+                              value: e.isActive,
+                            ),
+                          )
+                          .toList(),
+                ),
               ),
             ],
           ),
