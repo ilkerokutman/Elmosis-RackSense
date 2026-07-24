@@ -20,7 +20,13 @@ class UnitWidget extends StatelessWidget {
           children: [
             ListTile(
               title: Text('Klima #$unitId'),
-              subtitle: Text('status text here'),
+              subtitle: Text(
+                state.communicationFailureStartedAt != null
+                    ? 'Haberleşme hatası'
+                    : state.status == 0x01
+                    ? 'Çalışıyor'
+                    : 'Bekliyor',
+              ),
               trailing: IconButton(
                 onPressed: () {},
                 icon: Icon(Icons.power_settings_new),
@@ -82,7 +88,7 @@ class UnitWidget extends StatelessWidget {
                   child: NtcCardWidget(
                     label: 'HATA',
                     value: state.errorCode == 0x00
-                        ? '---'
+                        ? '-'
                         : state.errorCode.toString(),
                   ),
                 ),
