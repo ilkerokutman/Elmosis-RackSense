@@ -1,3 +1,5 @@
+// ignore_for_file: dead_code
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -42,6 +44,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (controller) {
         final targetTemperature =
             _pendingTemperature ?? controller.desiredTemperature;
+        return AppScaffold(
+          selectedIndex: 0,
+          title: 'RackSense: Control',
+
+          body: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      flex: 6,
+                      child: Container(
+                        color: Colors.orange,
+                        // temperature control
+                      ),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              color: Colors.purple,
+                              //unit A
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              color: Colors.green,
+                              //unit B
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                color: Colors.yellow,
+                // footercards
+              ),
+            ],
+          ),
+        );
+
         return AppScaffold(
           selectedIndex: 0,
           title: 'RackSense: Control',
