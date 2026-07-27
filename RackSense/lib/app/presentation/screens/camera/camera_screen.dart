@@ -11,7 +11,7 @@ import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
 class CameraScreen extends StatelessWidget {
   const CameraScreen({super.key});
 
-  static const _mockCameraStreamUrl = 'http://192.168.0.66:8080/video_feed';
+  static const _mockCameraStreamUrl = 'http://localhost:8080/video_feed';
 
   @override
   Widget build(BuildContext context) {
@@ -29,24 +29,14 @@ class CameraScreen extends StatelessWidget {
             builder: (context, constraints) {
               final camera = _LiveCameraPanel(streamUrl: _mockCameraStreamUrl);
               final security = _SecurityPanel(openDoors: openDoors);
-              if (constraints.maxWidth < 720) {
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Expanded(flex: 3, child: camera),
-                      const SizedBox(height: 12),
-                      SizedBox(height: 220, child: security),
-                    ],
-                  ),
-                );
-              }
+
               return Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8),
                 child: Row(
+                  spacing: 8,
                   children: [
                     Expanded(flex: 3, child: camera),
-                    const SizedBox(width: 12),
+
                     SizedBox(width: 280, child: security),
                   ],
                 ),
