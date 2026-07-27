@@ -10,6 +10,8 @@ class AcUnitState {
     this.ntc3,
     this.fanLevel,
     this.isRunning = false,
+    this.isConnected = true,
+    this.nextProbeAt,
     this.lastResponseAt,
     this.lastTurnedOnAt,
     this.lastTurnedOffAt,
@@ -27,6 +29,8 @@ class AcUnitState {
   final int? ntc3;
   final int? fanLevel;
   final bool isRunning;
+  final bool isConnected;
+  final DateTime? nextProbeAt;
   final DateTime? lastResponseAt;
   final DateTime? lastTurnedOnAt;
   final DateTime? lastTurnedOffAt;
@@ -47,6 +51,8 @@ class AcUnitState {
     int? ntc3,
     int? fanLevel,
     bool? isRunning,
+    bool? isConnected,
+    DateTime? nextProbeAt,
     DateTime? lastResponseAt,
     DateTime? lastTurnedOnAt,
     DateTime? lastTurnedOffAt,
@@ -54,6 +60,7 @@ class AcUnitState {
     DateTime? communicationFailureStartedAt,
     bool clearFailureStartedAt = false,
     bool clearCommunicationFailureStartedAt = false,
+    bool clearNextProbeAt = false,
   }) {
     return AcUnitState(
       deviceId: deviceId,
@@ -66,6 +73,8 @@ class AcUnitState {
       ntc3: ntc3 ?? this.ntc3,
       fanLevel: fanLevel ?? this.fanLevel,
       isRunning: isRunning ?? this.isRunning,
+      isConnected: isConnected ?? this.isConnected,
+      nextProbeAt: clearNextProbeAt ? null : nextProbeAt ?? this.nextProbeAt,
       lastResponseAt: lastResponseAt ?? this.lastResponseAt,
       lastTurnedOnAt: lastTurnedOnAt ?? this.lastTurnedOnAt,
       lastTurnedOffAt: lastTurnedOffAt ?? this.lastTurnedOffAt,

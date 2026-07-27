@@ -18,7 +18,8 @@ class UnitWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final canTurnOn = controller.canTurnOn(state.deviceId);
     final canTurnOff = controller.canTurnOff(state.deviceId);
-    final isFaulted = state.hasError;
+    final isDisconnected = !state.isConnected;
+    final isFaulted = state.hasError || isDisconnected;
     final isOff = !state.isRunning;
     final scheme = Theme.of(context).colorScheme;
     final backgroundColor = isFaulted
@@ -48,12 +49,15 @@ class UnitWidget extends StatelessWidget {
       backgroundColor: backgroundColor,
       borderColor: borderColor,
     );
-    final actionLabel = state.communicationFailureStartedAt != null
+    final actionLabel = isDisconnected
+        ? 'Bağlı değil'
+        : state.communicationFailureStartedAt != null
         ? 'Haberleşme hatası'
         : state.isRunning
         ? 'Çalışıyor'
         : 'Bekliyor';
-    final isAllowed = state.isRunning ? canTurnOff : canTurnOn;
+    final isAllowed =
+        !isDisconnected && (state.isRunning ? canTurnOff : canTurnOn);
     final cooldown = controller.cooldownSecondsRemaining(
       state.deviceId,
       turningOn: !state.isRunning,
@@ -110,25 +114,25 @@ class UnitWidget extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ntc(
-                      label: 'NTC 1',
+                      label: 'NTC 0',
                       value: state.ntc0 == null ? '-' : '${state.ntc0}°',
                     ),
                   ),
                   Expanded(
                     child: ntc(
-                      label: 'NTC 2',
+                      label: 'NTC 1',
                       value: state.ntc1 == null ? '-' : '${state.ntc1}°',
                     ),
                   ),
                   Expanded(
                     child: ntc(
-                      label: 'NTC 3',
+                      label: 'NTC 2',
                       value: state.ntc2 == null ? '-' : '${state.ntc2}°',
                     ),
                   ),
                   Expanded(
                     child: ntc(
-                      label: 'NTC 4',
+                      label: 'NTC 3',
                       value: state.ntc3 == null ? '-' : '${state.ntc3}°',
                     ),
                   ),

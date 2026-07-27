@@ -20,6 +20,8 @@ const List<int> sixInts = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06];
 const List<int> fourInts = [0x01, 0x02, 0x03, 0x04];
 const int mainboardId = 0x00;
 const int one = 0x01;
+const int maxConsecutiveCommunicationTimeouts = 3;
+const Duration disconnectedUnitProbeInterval = Duration(minutes: 10);
 
 class AppController extends GetxController {
   late final ConnectivityService _connectivityService;
@@ -56,6 +58,7 @@ class AppController extends GetxController {
   final RxInt _inputRevision = 0.obs;
   final RxBool _cabinetShutdownBlocked = false.obs;
   final Set<int> _handledFailureDevices = <int>{};
+  final Map<int, int> _communicationTimeoutCounts = <int, int>{};
   bool _isBuzzerPatternRunning = false;
 
   DateTime? _nextAutoSwitchAt;
@@ -66,14 +69,14 @@ class AppController extends GetxController {
   RxInt get inputRevisionRx => _inputRevision;
   bool get isCabinetShutdownBlocked => _cabinetShutdownBlocked.value;
   DateTime? get nextAutoSwitchAt => _nextAutoSwitchAt;
-  double? get averageNtcTemperature {
-    final temperatures = units.values
-        .expand((unit) => unit.temperatures)
-        .whereType<int>()
-        .toList(growable: false);
-    if (temperatures.isEmpty) return null;
-    return temperatures.reduce((total, value) => total + value) /
-        temperatures.length;
+  double? get rackTemperature {
+    final connectedUnits = units.values.where(
+      (unit) => unit.isConnected && unit.ntc1 != null,
+    );
+    final unit =
+        connectedUnits.where((unit) => unit.isRunning).firstOrNull ??
+        connectedUnits.where((unit) => unit.lastResponseAt != null).firstOrNull;
+    return unit?.ntc1?.toDouble();
   }
 
   AcUnitState unitFor(int deviceId) =>
@@ -82,6 +85,7 @@ class AppController extends GetxController {
   bool canTurnOn(int deviceId) {
     if (isCabinetShutdownBlocked) return false;
     final unit = unitFor(deviceId);
+    if (!unit.isConnected) return false;
     return unit.lastTurnedOffAt == null ||
         DateTime.now().difference(unit.lastTurnedOffAt!) >=
             const Duration(seconds: 15);
@@ -89,6 +93,7 @@ class AppController extends GetxController {
 
   bool canTurnOff(int deviceId) {
     final unit = unitFor(deviceId);
+    if (!unit.isConnected) return false;
     return unit.lastTurnedOnAt == null ||
         DateTime.now().difference(unit.lastTurnedOnAt!) >=
             const Duration(seconds: 15);
@@ -167,10 +172,17 @@ class AppController extends GetxController {
     if (value < 16 || value > 30) return;
     _desiredTemperature.value = value;
     setAutoMode(false);
+    final connectedUnits = units.values.where((unit) => unit.isConnected);
     final targetUnit =
-        units.values.where((unit) => unit.isRunning).firstOrNull ??
-        units.values.where((unit) => unit.lastResponseAt != null).firstOrNull ??
-        unitFor(SerialKeys.device1);
+        connectedUnits.where((unit) => unit.isRunning).firstOrNull ??
+        connectedUnits
+            .where((unit) => unit.lastResponseAt != null)
+            .firstOrNull ??
+        connectedUnits.firstOrNull;
+    if (targetUnit == null) {
+      update();
+      return;
+    }
     if (targetUnit.targetTemperature != value) {
       _messageStack.removeWhere(
         (message) =>
@@ -826,6 +838,7 @@ class AppController extends GetxController {
 
   void _onSerialMessageReceived(Uint8List data) {
     List<int> rawData = data.toList();
+    _markDeviceConnected(rawData[1]);
 
     // Validate CRC
     // if (!SerialUtils.validateCrc(rawData)) {
@@ -960,6 +973,8 @@ class AppController extends GetxController {
           : previous.lastTurnedOffAt,
       failureStartedAt: hasError ? previous.failureStartedAt ?? now : null,
       clearFailureStartedAt: !hasError,
+      isConnected: true,
+      clearNextProbeAt: true,
       clearCommunicationFailureStartedAt: true,
     );
     _units[deviceId] = updated;
@@ -1126,6 +1141,7 @@ class AppController extends GetxController {
         await sendSerialMessageFromStack();
         await waitForSerialResponse();
       }
+      if (!_shouldPollDevice(deviceId)) continue;
       // Read outputs
       // await sendSerialMessage(SerialMessage(device: deviceId, command: 0x69));
       // await waitForSerialResponse();
@@ -1187,14 +1203,44 @@ class AppController extends GetxController {
     }
   }
 
-  void _markCommunicationTimeout(int deviceId) {
+  bool _shouldPollDevice(int deviceId) {
+    final unit = unitFor(deviceId);
+    return unit.isConnected ||
+        unit.nextProbeAt == null ||
+        !DateTime.now().isBefore(unit.nextProbeAt!);
+  }
+
+  void _markDeviceConnected(int deviceId) {
+    if (deviceId == mainboardId) return;
+    _communicationTimeoutCounts.remove(deviceId);
     final previous = unitFor(deviceId);
+    if (previous.isConnected && previous.nextProbeAt == null) return;
+    _units[deviceId] = previous.copyWith(
+      isConnected: true,
+      clearNextProbeAt: true,
+      clearCommunicationFailureStartedAt: true,
+    );
+    update();
+  }
+
+  void _markCommunicationTimeout(int deviceId) {
     final now = DateTime.now();
+    final count = (_communicationTimeoutCounts[deviceId] ?? 0) + 1;
+    _communicationTimeoutCounts[deviceId] = count;
+    final previous = unitFor(deviceId);
+    final isDisconnected = count >= maxConsecutiveCommunicationTimeouts;
     final updated = previous.copyWith(
+      isConnected: !isDisconnected,
+      nextProbeAt: isDisconnected
+          ? now.add(disconnectedUnitProbeInterval)
+          : null,
       communicationFailureStartedAt:
           previous.communicationFailureStartedAt ?? now,
     );
     _units[deviceId] = updated;
+    if (isDisconnected) {
+      _messageStack.removeWhere((message) => message.device == deviceId);
+    }
     final startedAt = updated.communicationFailureStartedAt!;
     final backupDeviceId = deviceId == SerialKeys.device1
         ? SerialKeys.device2
@@ -1207,6 +1253,7 @@ class AppController extends GetxController {
       requestTurnOff(deviceId, isAutomatic: true);
       requestTurnOn(backupDeviceId, isAutomatic: true);
     }
+    update();
   }
 
   //endregion
