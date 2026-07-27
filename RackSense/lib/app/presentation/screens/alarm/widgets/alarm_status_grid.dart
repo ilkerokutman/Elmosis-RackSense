@@ -43,7 +43,7 @@ class AlarmStatusGrid extends StatelessWidget {
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
-            childAspectRatio: 1.45,
+            childAspectRatio: 1.25,
           ),
           itemCount: items.length,
           itemBuilder: (context, index) => _AlarmGridCard(item: items[index]),
