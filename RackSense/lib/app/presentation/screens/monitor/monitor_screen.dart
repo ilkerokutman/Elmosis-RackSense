@@ -84,7 +84,7 @@ class _MonitorScreenState extends State<MonitorScreen> {
                 Expanded(
                   child: Text(
                     'Sıcaklık Geçmişi',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.labelMedium,
                   ),
                 ),
                 _Legend(color: scheme.primary, label: 'Ortam (NTC 1)'),
@@ -142,7 +142,7 @@ class _MonitorScreenState extends State<MonitorScreen> {
               children: [
                 Text(
                   'Canlı Özet',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -191,7 +191,7 @@ class _MonitorScreenState extends State<MonitorScreen> {
 }
 
 enum _MonitorRange {
-  fiveMinutes(Duration(minutes: 5), 'Son 5 dakika'),
+  fiveMinutes(Duration(minutes: 5), 'Son 5 dk'),
   hour(Duration(hours: 1), 'Son 1 saat'),
   day(Duration(hours: 24), 'Son 24 saat');
 
