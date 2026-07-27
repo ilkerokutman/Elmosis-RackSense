@@ -17,14 +17,7 @@ class AppBarWidget extends StatelessWidget {
             ...?actions,
 
             SizedBox(width: 8),
-            Icon(
-              Icons.sync_alt,
-              color: ac.processingSerialLoop
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.3),
-            ),
+
             ac.isOnline
                 ? Icon(Icons.lan_outlined, color: Colors.greenAccent)
                 : Icon(Icons.wifi_off, color: Colors.grey),

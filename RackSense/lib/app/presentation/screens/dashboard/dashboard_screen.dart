@@ -9,6 +9,7 @@ import 'package:rack_sense/app/data/controllers/alarm_controller.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
 import 'package:rack_sense/app/presentation/screens/dashboard/alarm_card.dart';
+import 'package:rack_sense/app/presentation/screens/dashboard/serial_queue_status.dart';
 import 'package:rack_sense/app/presentation/screens/dashboard/temperature_card.dart';
 import 'package:rack_sense/app/presentation/screens/dashboard/unit.dart';
 
@@ -89,6 +90,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              SerialQueueStatusWidget(
+                controller: controller,
+                pendingTemperature: _pendingTemperature,
+              ),
               Expanded(
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
