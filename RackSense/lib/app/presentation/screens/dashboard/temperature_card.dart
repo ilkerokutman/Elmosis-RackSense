@@ -36,15 +36,15 @@ class TemperatureControlCardWidget extends StatelessWidget {
                       actualTemperature?.toStringAsFixed(1) ?? '--',
                       style: const TextStyle(
                         fontSize: 122,
-                        fontWeight: FontWeight.w200,
+                        fontWeight: FontWeight.w100,
                       ),
                     ),
                     const Text(
                       '°C',
                       style: TextStyle(
-                        fontSize: 66,
+                        fontSize: 48,
                         height: 1,
-                        fontWeight: FontWeight.w200,
+                        fontWeight: FontWeight.w100,
                       ),
                     ),
                   ],
