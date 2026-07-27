@@ -39,104 +39,110 @@ class UnitWidget extends StatelessWidget {
       state.deviceId,
       turningOn: !state.isRunning,
     );
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(8),
-      ),
-      margin: EdgeInsets.all(2),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Column(
-          children: [
-            ListTile(
-              dense: true,
-              title: Text('Klima #$unitId'),
-              subtitle: Text(actionLabel),
-              trailing: cooldown > 0
-                  ? SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator(
-                        value: 1 - (cooldown / 15),
-                      ),
-                    )
-                  : IconButton(
-                      onPressed: isAllowed
-                          ? () {
-                              if (state.isRunning) {
-                                controller.requestTurnOff(state.deviceId);
-                              } else {
-                                controller.requestTurnOn(state.deviceId);
+    return Opacity(
+      opacity: isFaulted ? 0.7 : 1,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusGeometry.circular(8),
+        ),
+        margin: EdgeInsets.all(2),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Column(
+            children: [
+              ListTile(
+                dense: true,
+                title: Text('Klima #$unitId'),
+                subtitle: Text(actionLabel),
+                trailing: cooldown > 0
+                    ? SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          value: 1 - (cooldown / 15),
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: isAllowed
+                            ? () {
+                                if (state.isRunning) {
+                                  controller.requestTurnOff(state.deviceId);
+                                } else {
+                                  controller.requestTurnOn(state.deviceId);
+                                }
                               }
-                            }
-                          : null,
-                      icon: Icon(Icons.power_settings_new, color: statusColor),
-                      color: statusBgColor,
+                            : null,
+                        icon: Icon(
+                          Icons.power_settings_new,
+                          color: statusColor,
+                        ),
+                        color: statusBgColor,
+                      ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'NTC 1',
+                      value: state.ntc0 == null ? '-' : '${state.ntc0}°',
                     ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'NTC 1',
-                    value: state.ntc0 == null ? '-' : '${state.ntc0}°',
                   ),
-                ),
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'NTC 2',
-                    value: state.ntc1 == null ? '-' : '${state.ntc1}°',
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'NTC 2',
+                      value: state.ntc1 == null ? '-' : '${state.ntc1}°',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'NTC 3',
-                    value: state.ntc2 == null ? '-' : '${state.ntc2}°',
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'NTC 3',
+                      value: state.ntc2 == null ? '-' : '${state.ntc2}°',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'NTC 4',
-                    value: state.ntc3 == null ? '-' : '${state.ntc3}°',
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'NTC 4',
+                      value: state.ntc3 == null ? '-' : '${state.ntc3}°',
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'SET',
-                    value: state.targetTemperature == null
-                        ? '-'
-                        : '${state.targetTemperature}°',
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'SET',
+                      value: state.targetTemperature == null
+                          ? '-'
+                          : '${state.targetTemperature}°',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'FAN',
-                    value: state.fanLevel == null ? '-' : '${state.fanLevel}',
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'FAN',
+                      value: state.fanLevel == null ? '-' : '${state.fanLevel}',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'DURUM',
-                    value: state.isRunning ? 'ON' : 'OFF',
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'DURUM',
+                      value: state.isRunning ? 'ON' : 'OFF',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: NtcCardWidget(
-                    label: 'HATA',
-                    value: state.errorCode == 0x00
-                        ? '-'
-                        : state.errorCode.toString(),
+                  Expanded(
+                    child: NtcCardWidget(
+                      label: 'HATA',
+                      value: state.errorCode == 0x00
+                          ? '-'
+                          : state.errorCode.toString(),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

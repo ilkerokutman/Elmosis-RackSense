@@ -10,6 +10,7 @@ import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/data/models/ac_unit_state.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
 import 'package:rack_sense/app/presentation/screens/dashboard/alarm_card.dart';
+import 'package:rack_sense/app/presentation/screens/dashboard/temperature_card.dart';
 import 'package:rack_sense/app/presentation/screens/dashboard/unit.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -49,6 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _pendingTemperature ?? controller.desiredTemperature;
 
         final alarmController = Get.find<AlarmController>();
+
         return AppScaffold(
           selectedIndex: 0,
           title: 'RackSense: Control',
@@ -64,9 +66,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Expanded(
                       flex: 6,
-                      child: Container(
-                        color: Colors.orange,
-                        // temperature control
+                      child: TemperatureControlCardWidget(
+                        value: targetTemperature,
+                        onDecrease: () => _changeTemperature(controller, -1),
+                        onIncrease: () => _changeTemperature(controller, 1),
                       ),
                     ),
                     Expanded(
