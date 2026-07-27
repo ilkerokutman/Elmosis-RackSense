@@ -90,23 +90,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SerialQueueStatusWidget(
-                controller: controller,
-                pendingTemperature: _pendingTemperature,
-              ),
               Expanded(
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      flex: 6,
-                      child: TemperatureControlCardWidget(
-                        value: targetTemperature,
-                        actualTemperature: controller.averageNtcTemperature,
-                        onDecrease: () => _changeTemperature(controller, -1),
-                        onIncrease: () => _changeTemperature(controller, 1),
-                      ),
+                    Column(
+                      children: [
+                        SerialQueueStatusWidget(
+                          controller: controller,
+                          pendingTemperature: _pendingTemperature,
+                        ),
+                        Expanded(
+                          flex: 6,
+                          child: TemperatureControlCardWidget(
+                            value: targetTemperature,
+                            actualTemperature: controller.averageNtcTemperature,
+                            onDecrease: () =>
+                                _changeTemperature(controller, -1),
+                            onIncrease: () => _changeTemperature(controller, 1),
+                          ),
+                        ),
+                      ],
                     ),
                     Expanded(
                       flex: 4,
