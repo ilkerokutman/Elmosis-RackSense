@@ -143,7 +143,7 @@ class UnitWidget extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ntc(
-                      label: 'SET',
+                      label: 'HEDEF',
                       value: state.targetTemperature == null
                           ? '-'
                           : '${state.targetTemperature}°',
@@ -158,7 +158,7 @@ class UnitWidget extends StatelessWidget {
                   Expanded(
                     child: ntc(
                       label: 'DURUM',
-                      value: state.isRunning ? 'ON' : 'OFF',
+                      value: state.isRunning ? 'AÇIK' : 'KAPALI',
                     ),
                   ),
                   Expanded(

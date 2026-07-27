@@ -33,7 +33,7 @@ class TemperatureControlCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      actualTemperature?.toStringAsFixed(1) ?? '--',
+                      actualTemperature?.toStringAsFixed(0) ?? '--',
                       style: const TextStyle(
                         fontSize: 122,
                         fontWeight: FontWeight.w100,

@@ -50,7 +50,7 @@ class SerialQueueStatusWidget extends StatelessWidget {
     if (pendingTemperature != null) {
       return _QueueStatus(
         icon: Icons.tune,
-        message: 'Preparing $pendingTemperature°C request…',
+        message: '$pendingTemperature°C isteği hazırlanıyor…',
         color: _StatusColor.warning,
         isInProgress: true,
       );
@@ -67,10 +67,10 @@ class SerialQueueStatusWidget extends StatelessWidget {
             ? Icons.upload
             : Icons.sync,
         message: isConnectivityProbe
-            ? 'Checking Klima #${current.device} connection…'
+            ? 'Klima #${current.device} bağlantısı denetleniyor…'
             : isUserCommand
-            ? 'Sending ${_commandLabel(current)}…'
-            : 'Reading Klima #${current.device}…',
+            ? '${_commandLabel(current)} gönderiliyor…'
+            : 'Klima #${current.device} verileri okunuyor…',
         color: isUserCommand ? _StatusColor.warning : _StatusColor.primary,
         isInProgress: true,
       );
@@ -81,7 +81,7 @@ class SerialQueueStatusWidget extends StatelessWidget {
       final next = queued.first;
       return _QueueStatus(
         icon: Icons.schedule,
-        message: 'Queued: ${_commandLabel(next)} (${queued.length} waiting)',
+        message: 'Sırada: ${_commandLabel(next)} (${queued.length} bekliyor)',
         color: _StatusColor.warning,
         isInProgress: false,
       );
@@ -89,7 +89,7 @@ class SerialQueueStatusWidget extends StatelessWidget {
 
     return const _QueueStatus(
       icon: Icons.check_circle_outline,
-      message: 'Ready',
+      message: 'Hazır',
       color: _StatusColor.muted,
       isInProgress: false,
     );
@@ -103,11 +103,11 @@ class SerialQueueStatusWidget extends StatelessWidget {
     final device = 'Klima #${message.device}';
     return switch (message.command) {
       SerialKeys.cmdSetValue =>
-        'setting $device to ${message.arg.toSigned(8)}°C',
-      SerialKeys.cmdTurnOn => 'starting $device',
-      SerialKeys.cmdTurnOff => 'stopping $device',
-      SerialKeys.cmdReset => 'resetting $device',
-      _ => 'processing $device',
+        '$device için ${message.arg.toSigned(8)}°C ayarı',
+      SerialKeys.cmdTurnOn => '$device çalıştırma',
+      SerialKeys.cmdTurnOff => '$device durdurma',
+      SerialKeys.cmdReset => '$device yeniden başlatma',
+      _ => '$device işlemi',
     };
   }
 }

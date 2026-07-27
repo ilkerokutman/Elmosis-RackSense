@@ -8,8 +8,8 @@ class SyncScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       selectedIndex: 4,
-      title: 'Seknronizasyon',
-      body: Center(child: Text('TODO: Azure sync ve history')),
+      title: 'Senkronizasyon',
+      body: Center(child: Text('Yakında: Azure eşitleme ve geçmiş')),
     );
   }
 }

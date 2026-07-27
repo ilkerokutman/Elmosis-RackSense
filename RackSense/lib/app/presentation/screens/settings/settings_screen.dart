@@ -166,36 +166,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Device Control (Dev Mode)',
+                    'Cihaz Kontrolü (Geliştirici Modu)',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
                   _buildValueRow(
-                    'Set Temperature',
+                    'Hedef Sıcaklık',
                     _setTemperature == null ? null : '$_setTemperature°C',
                   ),
-                  _buildValueRow('NTC0', _ntc0 == null ? null : '$_ntc0°C'),
-                  _buildValueRow('NTC1', _ntc1 == null ? null : '$_ntc1°C'),
-                  _buildValueRow('NTC2', _ntc2 == null ? null : '$_ntc2°C'),
-                  _buildValueRow('NTC3', _ntc3 == null ? null : '$_ntc3°C'),
+                  _buildValueRow('NTC 0', _ntc0 == null ? null : '$_ntc0°C'),
+                  _buildValueRow('NTC 1', _ntc1 == null ? null : '$_ntc1°C'),
+                  _buildValueRow('NTC 2', _ntc2 == null ? null : '$_ntc2°C'),
+                  _buildValueRow('NTC 3', _ntc3 == null ? null : '$_ntc3°C'),
                   _buildValueRow(
-                    'Fan Level',
+                    'Fan Seviyesi',
                     _fanLevel == null ? null : '$_fanLevel',
                   ),
-                  _buildValueRow('Outputs', outputsText),
-                  _buildValueRow('Inputs', inputsText),
+                  _buildValueRow('Çıkışlar', outputsText),
+                  _buildValueRow('Girişler', inputsText),
                   _buildValueRow(
-                    'Device Status',
+                    'Cihaz Durumu',
                     _deviceStatus == null
                         ? null
                         : '0x${_deviceStatus!.toRadixString(16).padLeft(2, '0')}',
                   ),
                   _buildValueRow(
-                    'Running',
-                    _isRunning == null ? null : (_isRunning! ? 'ON' : 'OFF'),
+                    'Çalışma Durumu',
+                    _isRunning == null
+                        ? null
+                        : (_isRunning! ? 'AÇIK' : 'KAPALI'),
                   ),
                   _buildValueRow(
-                    'Error Code',
+                    'Hata Kodu',
                     _errorCode == null
                         ? null
                         : '0x${_errorCode!.toRadixString(16).padLeft(2, '0')}',
@@ -215,7 +217,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Set Temperature',
+                          'Hedef Sıcaklık',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 8),
@@ -260,17 +262,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       : () => _toggleOnOff(!_isRunning!),
                   child: Text(
                     _isOnOffBusy
-                        ? 'Waiting...'
+                        ? 'Bekleniyor...'
                         : _isRunning == true
-                        ? 'Turn Off'
-                        : 'Turn On',
+                        ? 'Kapat'
+                        : 'Çalıştır',
                   ),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: _refresh,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh Readings'),
+                  label: const Text('Ölçümleri Yenile'),
                 ),
               ],
             ),

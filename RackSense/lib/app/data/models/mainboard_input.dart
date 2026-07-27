@@ -13,5 +13,5 @@ enum MainboardInput {
   final int number;
   final int gpioPin;
 
-  String get label => 'Input $number';
+  String get label => 'Giriş $number';
 }

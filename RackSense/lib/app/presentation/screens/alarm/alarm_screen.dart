@@ -14,7 +14,7 @@ class AlarmScreen extends StatelessWidget {
       builder: (controller) {
         return AppScaffold(
           selectedIndex: 2,
-          title: 'RackSense: Alarms',
+          title: 'RackSense: Alarmlar',
           body: GetBuilder<AppController>(
             builder: (appController) => AlarmStatusGrid(
               alarms: controller.alarms,

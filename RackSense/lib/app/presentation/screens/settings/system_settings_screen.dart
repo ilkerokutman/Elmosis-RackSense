@@ -15,14 +15,14 @@ class SystemSettingsScreen extends StatelessWidget {
         final settings = controller.settings;
         return AppScaffold(
           selectedIndex: 5,
-          title: 'RackSense: Settings',
+          title: 'RackSense: Ayarlar',
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Operation',
+                  'Çalışma Ayarları',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
@@ -30,9 +30,9 @@ class SystemSettingsScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        title: const Text('Auto-switch interval'),
+                        title: const Text('Otomatik geçiş aralığı'),
                         subtitle: Text(
-                          '${settings.autoSwitchIntervalMinutes} minutes',
+                          '${settings.autoSwitchIntervalMinutes} dakika',
                         ),
                         trailing: SizedBox(
                           width: 280,
@@ -43,7 +43,7 @@ class SystemSettingsScreen extends StatelessWidget {
                             value: settings.autoSwitchIntervalMinutes
                                 .clamp(30, 720)
                                 .toDouble(),
-                            label: '${settings.autoSwitchIntervalMinutes} min',
+                            label: '${settings.autoSwitchIntervalMinutes} dk.',
                             onChanged: (value) {
                               controller.updateAutoSwitchInterval(
                                 value.round(),
@@ -53,7 +53,7 @@ class SystemSettingsScreen extends StatelessWidget {
                         ),
                       ),
                       SwitchListTile(
-                        title: const Text('Dark theme'),
+                        title: const Text('Koyu tema'),
                         value: settings.isDarkMode,
                         onChanged: controller.updateTheme,
                       ),
@@ -62,7 +62,7 @@ class SystemSettingsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Cabinet Alarm Inputs',
+                  'Kabin Alarm Girişleri',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
@@ -70,7 +70,7 @@ class SystemSettingsScreen extends StatelessWidget {
                   _AlarmInputCard(config: config, controller: controller),
                 const SizedBox(height: 20),
                 Text(
-                  'Sync Defaults',
+                  'Senkronizasyon Varsayılanları',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
@@ -78,19 +78,19 @@ class SystemSettingsScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        title: const Text('Azure sync interval'),
+                        title: const Text('Azure eşitleme aralığı'),
                         trailing: Text(
-                          '${settings.azureSyncIntervalMinutes} min',
+                          '${settings.azureSyncIntervalMinutes} dk.',
                         ),
                       ),
                       ListTile(
-                        title: const Text('Batch size'),
-                        trailing: Text('${settings.azureSyncBatchSize} rows'),
+                        title: const Text('Toplu işlem boyutu'),
+                        trailing: Text('${settings.azureSyncBatchSize} satır'),
                       ),
                       ListTile(
-                        title: const Text('Retry policy'),
+                        title: const Text('Yeniden deneme ilkesi'),
                         trailing: Text(
-                          '${settings.syncRetryCount} × ${settings.syncRetryIntervalMinutes} min',
+                          '${settings.syncRetryCount} × ${settings.syncRetryIntervalMinutes} dk.',
                         ),
                       ),
                     ],
@@ -127,7 +127,7 @@ class _AlarmInputCard extends StatelessWidget {
                   child: DropdownButtonFormField<MainboardInput>(
                     initialValue: config.input,
                     decoration: const InputDecoration(
-                      labelText: 'Mainboard input',
+                      labelText: 'Ana kart girişi',
                     ),
                     items: MainboardInput.values
                         .map(
@@ -151,7 +151,7 @@ class _AlarmInputCard extends StatelessWidget {
                   child: DropdownButtonFormField<AlarmAction>(
                     initialValue: config.action,
                     decoration: const InputDecoration(
-                      labelText: 'Alarm action',
+                      labelText: 'Alarm eylemi',
                     ),
                     items: AlarmAction.values
                         .map(
@@ -171,7 +171,7 @@ class _AlarmInputCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Column(
                   children: [
-                    const Text('Invert'),
+                    const Text('Tersle'),
                     Switch(
                       value: config.isInverted,
                       onChanged: (value) {
@@ -192,8 +192,8 @@ class _AlarmInputCard extends StatelessWidget {
   }
 
   String _actionLabel(AlarmAction action) => switch (action) {
-    AlarmAction.none => 'Do nothing',
-    AlarmAction.soundBuzzer => 'Sound buzzer',
-    AlarmAction.turnOffDevices => 'Turn off devices',
+    AlarmAction.none => 'Eylem yok',
+    AlarmAction.soundBuzzer => 'Sesli uyarı ver',
+    AlarmAction.turnOffDevices => 'Cihazları kapat',
   };
 }

@@ -53,7 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         return AppScaffold(
           selectedIndex: 0,
-          title: 'RackSense: Control',
+          title: 'RackSense: Kontrol',
           actions: [
             Row(
               mainAxisSize: MainAxisSize.min,

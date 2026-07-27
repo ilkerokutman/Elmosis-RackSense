@@ -13,7 +13,7 @@ class MonitorScreen extends StatelessWidget {
       builder: (app) {
         return AppScaffold(
           selectedIndex: 1,
-          title: 'RackSense: Monitor',
+          title: 'RackSense: İzleme',
           body: Row(
             children: [
               Expanded(
