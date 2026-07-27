@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/alarm_controller.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 import 'package:rack_sense/app/data/controllers/settings_controller.dart';
+import 'package:rack_sense/app/data/controllers/sync_controller.dart';
 import 'package:rack_sense/app/data/services/connectivity_service.dart';
 import 'package:rack_sense/app/data/services/database_service.dart';
 import 'package:rack_sense/app/data/services/serial_service.dart';
@@ -49,6 +50,7 @@ class InitialBindings extends Bindings {
     // print("Dependency Injection: MAIN init completed");
 
     await Get.putAsync(() async => SettingsController(), permanent: true);
+    await Get.putAsync(() async => SyncController(), permanent: true);
 
     print("Dependency Injection: Starting APP init");
     await Get.putAsync(() async => AppController(), permanent: true);

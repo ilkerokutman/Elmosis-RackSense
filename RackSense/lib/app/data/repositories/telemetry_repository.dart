@@ -69,6 +69,26 @@ class TelemetryRepository {
         .toList(growable: false);
   }
 
+  Future<int> pendingSyncCount() => _syncCount(['pending']);
+
+  Future<int> failedSyncCount() => _syncCount(['failed', 'error']);
+
+  Future<int> _syncCount(List<String> statuses) async {
+    final database = await _databaseService.database;
+    final placeholders = List.filled(statuses.length, '?').join(', ');
+    final records = await database.rawQuery(
+      '''
+        SELECT
+          (SELECT COUNT(*) FROM telemetry_records
+            WHERE sync_status IN ($placeholders)) +
+          (SELECT COUNT(*) FROM runtime_events
+            WHERE sync_status IN ($placeholders)) AS total
+      ''',
+      [...statuses, ...statuses],
+    );
+    return records.single['total']! as int;
+  }
+
   Future<void> recordRuntimeEvent({
     required int deviceId,
     required String eventType,
