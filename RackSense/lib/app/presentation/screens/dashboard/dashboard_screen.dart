@@ -154,7 +154,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       .map(
                         (e) => Expanded(
                           child: AlarmCardWidget(
-                            label: e.config.label,
+                            label: e.config.displayLabel,
                             value: e.isActive,
                           ),
                         ),

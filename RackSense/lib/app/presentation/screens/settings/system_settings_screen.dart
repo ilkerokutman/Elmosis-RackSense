@@ -119,7 +119,10 @@ class _AlarmInputCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(config.label, style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              config.displayLabel,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Row(
               children: [

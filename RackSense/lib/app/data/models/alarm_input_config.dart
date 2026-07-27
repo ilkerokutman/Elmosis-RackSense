@@ -17,6 +17,15 @@ class AlarmInputConfig {
   final AlarmAction action;
   final bool isInverted;
 
+  String get displayLabel => switch (key) {
+    'smoke' => 'Duman',
+    'water_leak' => 'Su Kaçağı',
+    'front_door' => 'Ön Kapı Açık',
+    'rear_door' => 'Arka Kapı Açık',
+    'service_door' => 'Servis Kapısı Açık',
+    _ => label,
+  };
+
   AlarmInputConfig copyWith({
     MainboardInput? input,
     AlarmAction? action,

@@ -13,7 +13,7 @@ class AlarmStatusGrid extends StatelessWidget {
     final items = [
       ...alarms.map(
         (alarm) => _AlarmGridItem(
-          label: alarm.config.label,
+          label: alarm.config.displayLabel,
           detail: alarm.isActive ? 'ALARM' : 'Normal',
           isActive: alarm.isActive,
           icon: _iconFor(alarm.config.key),

@@ -19,27 +19,27 @@ class UnitWidget extends StatelessWidget {
     final canTurnOn = controller.canTurnOn(state.deviceId);
     final canTurnOff = controller.canTurnOff(state.deviceId);
     final isDisconnected = !state.isConnected;
-    final isFaulted = state.hasError || isDisconnected;
+    final hasDeviceError = state.hasError;
     final isOff = !state.isRunning;
     final scheme = Theme.of(context).colorScheme;
-    final backgroundColor = isFaulted
+    final backgroundColor = hasDeviceError
         ? scheme.errorContainer
-        : isOff
+        : isOff || isDisconnected
         ? scheme.surfaceContainerLow
         : scheme.primaryContainer;
-    final borderColor = isFaulted
+    final borderColor = hasDeviceError
         ? scheme.error
-        : isOff
+        : isDisconnected || isOff
         ? scheme.outlineVariant
         : scheme.primary;
-    final foregroundColor = isFaulted
+    final foregroundColor = hasDeviceError
         ? scheme.onErrorContainer
-        : isOff
+        : isDisconnected || isOff
         ? scheme.onSurfaceVariant
         : scheme.onPrimaryContainer;
-    final statusColor = isFaulted
+    final statusColor = hasDeviceError
         ? scheme.error
-        : isOff
+        : isDisconnected || isOff
         ? scheme.onSurfaceVariant
         : scheme.primary;
     NtcCardWidget ntc({required String label, String? value}) => NtcCardWidget(
@@ -63,12 +63,16 @@ class UnitWidget extends StatelessWidget {
       turningOn: !state.isRunning,
     );
     return Opacity(
-      opacity: isOff && !isFaulted ? 0.72 : 1,
+      opacity: isDisconnected
+          ? 0.55
+          : isOff && !hasDeviceError
+          ? 0.72
+          : 1,
       child: Card(
         color: backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusGeometry.circular(8),
-          side: BorderSide(color: borderColor, width: isFaulted ? 2 : 1),
+          side: BorderSide(color: borderColor, width: hasDeviceError ? 2 : 1),
         ),
         margin: EdgeInsets.all(2),
         child: Container(
