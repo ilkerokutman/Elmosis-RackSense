@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 
 class AppBarWidget extends StatelessWidget {
-  const AppBarWidget({super.key, this.title});
+  const AppBarWidget({super.key, this.title, this.actions});
   final String? title;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +14,7 @@ class AppBarWidget extends StatelessWidget {
         return AppBar(
           title: Text(title ?? 'RackSense'),
           actions: [
+            ...?actions,
             ac.isOnline
                 ? Icon(Icons.lan_outlined, color: Colors.greenAccent)
                 : Icon(Icons.wifi_off, color: Colors.grey),

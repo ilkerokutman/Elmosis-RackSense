@@ -22,12 +22,13 @@ class TemperatureControlCardWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
+            Text('Sıcaklık Kontrol'),
             Expanded(
               child: Center(
                 child: Text(
                   '$value°C', // TODO: this shall be the actual average environment temperature
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineLarge,
+                  style: TextStyle(fontSize: 122),
                 ),
               ),
             ),

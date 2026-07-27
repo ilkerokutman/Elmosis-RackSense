@@ -53,7 +53,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return AppScaffold(
           selectedIndex: 0,
           title: 'RackSense: Control',
-
+          actions: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Manuel'),
+                Switch(
+                  value: controller.isAutoMode,
+                  onChanged: (v) =>
+                      controller.setAutoMode(!controller.isAutoMode),
+                ),
+                Text('Otomatik'),
+              ],
+            ),
+          ],
           body: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
