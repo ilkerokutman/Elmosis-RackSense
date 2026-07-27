@@ -22,6 +22,7 @@ const int mainboardId = 0x00;
 const int one = 0x01;
 const int maxConsecutiveCommunicationTimeouts = 3;
 const Duration disconnectedUnitProbeInterval = Duration(minutes: 10);
+const Duration temperatureSampleInterval = Duration(seconds: 30);
 
 class AppController extends GetxController {
   late final ConnectivityService _connectivityService;
@@ -62,6 +63,7 @@ class AppController extends GetxController {
   bool _isBuzzerPatternRunning = false;
 
   DateTime? _nextAutoSwitchAt;
+  final Map<int, DateTime> _lastTemperatureSampleAt = {};
 
   Map<int, AcUnitState> get units => Map.unmodifiable(_units);
   bool get isAutoMode => _isAutoMode.value;
@@ -978,6 +980,7 @@ class AppController extends GetxController {
       clearCommunicationFailureStartedAt: true,
     );
     _units[deviceId] = updated;
+    _recordTemperatureSample(previous, updated, now);
     if (_isTemperatureControlUnit(deviceId) &&
         !_hasPendingSetValueCommand(deviceId)) {
       _desiredTemperature.value = updated.targetTemperature!;
@@ -1007,6 +1010,35 @@ class AppController extends GetxController {
       );
     }
     update();
+  }
+
+  void _recordTemperatureSample(
+    AcUnitState previous,
+    AcUnitState updated,
+    DateTime now,
+  ) {
+    if (!updated.isRunning ||
+        updated.ntc1 == null ||
+        updated.targetTemperature == null) {
+      return;
+    }
+    final lastSampleAt = _lastTemperatureSampleAt[updated.deviceId];
+    final targetChanged =
+        previous.targetTemperature != updated.targetTemperature;
+    if (!targetChanged &&
+        lastSampleAt != null &&
+        now.difference(lastSampleAt) < temperatureSampleInterval) {
+      return;
+    }
+    _lastTemperatureSampleAt[updated.deviceId] = now;
+    unawaited(
+      _telemetryRepository.recordTemperatureSample(
+        deviceId: updated.deviceId,
+        temperature: updated.ntc1!,
+        targetTemperature: updated.targetTemperature!,
+        occurredAt: now,
+      ),
+    );
   }
 
   bool _isTemperatureControlUnit(int deviceId) {
