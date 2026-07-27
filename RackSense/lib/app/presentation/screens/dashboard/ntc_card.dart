@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 
 class NtcCardWidget extends StatelessWidget {
-  const NtcCardWidget({super.key, required this.label, this.value});
+  const NtcCardWidget({
+    super.key,
+    required this.label,
+    this.value,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.borderColor,
+  });
+
   final String label;
   final String? value;
+  final Color? foregroundColor;
+  final Color? backgroundColor;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +24,9 @@ class NtcCardWidget extends StatelessWidget {
       margin: EdgeInsets.all(2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(8),
-        side: BorderSide(color: scheme.secondaryContainer),
+        side: BorderSide(color: borderColor ?? scheme.secondaryContainer),
       ),
+      color: backgroundColor,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         child: Column(
@@ -27,7 +39,9 @@ class NtcCardWidget extends StatelessWidget {
                 textAlign: TextAlign.start,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: foregroundColor,
+                ),
               ),
             ),
             Text(
@@ -37,6 +51,7 @@ class NtcCardWidget extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
+                color: foregroundColor,
               ),
             ),
           ],

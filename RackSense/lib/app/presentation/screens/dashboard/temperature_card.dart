@@ -4,10 +4,13 @@ class TemperatureControlCardWidget extends StatelessWidget {
   const TemperatureControlCardWidget({
     super.key,
     required this.value,
+    required this.actualTemperature,
     required this.onDecrease,
     required this.onIncrease,
   });
+
   final int value;
+  final double? actualTemperature;
   final VoidCallback onDecrease;
   final VoidCallback onIncrease;
   // actual temperature
@@ -25,10 +28,16 @@ class TemperatureControlCardWidget extends StatelessWidget {
             Text('Sıcaklık Kontrol'),
             Expanded(
               child: Center(
-                child: Text(
-                  '$value°C', // TODO: this shall be the actual average environment temperature
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 122),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      actualTemperature?.toStringAsFixed(1) ?? '--',
+                      style: const TextStyle(fontSize: 122),
+                    ),
+                    const Text('°C', style: TextStyle(fontSize: 66, height: 1)),
+                  ],
                 ),
               ),
             ),

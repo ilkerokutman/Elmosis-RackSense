@@ -15,6 +15,8 @@ class AppBarWidget extends StatelessWidget {
           title: Text(title ?? 'RackSense'),
           actions: [
             ...?actions,
+
+            SizedBox(width: 8),
             ac.isOnline
                 ? Icon(Icons.lan_outlined, color: Colors.greenAccent)
                 : Icon(Icons.wifi_off, color: Colors.grey),

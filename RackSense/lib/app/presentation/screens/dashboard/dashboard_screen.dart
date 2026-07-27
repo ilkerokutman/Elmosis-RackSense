@@ -79,8 +79,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Expanded(
                       flex: 6,
                       child: TemperatureControlCardWidget(
-                        //actualTemperature
                         value: targetTemperature,
+                        actualTemperature: controller.averageNtcTemperature,
                         onDecrease: () => _changeTemperature(controller, -1),
                         onIncrease: () => _changeTemperature(controller, 1),
                       ),

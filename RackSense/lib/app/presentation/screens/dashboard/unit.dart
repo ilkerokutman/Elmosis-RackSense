@@ -19,16 +19,35 @@ class UnitWidget extends StatelessWidget {
     final canTurnOn = controller.canTurnOn(state.deviceId);
     final canTurnOff = controller.canTurnOff(state.deviceId);
     final isFaulted = state.hasError;
-    final statusBgColor = isFaulted
-        ? Theme.of(context).colorScheme.errorContainer
-        : state.isRunning
-        ? Theme.of(context).colorScheme.primaryContainer
-        : Theme.of(context).colorScheme.outline;
+    final isOff = !state.isRunning;
+    final scheme = Theme.of(context).colorScheme;
+    final backgroundColor = isFaulted
+        ? scheme.errorContainer
+        : isOff
+        ? scheme.surfaceContainerLow
+        : scheme.primaryContainer;
+    final borderColor = isFaulted
+        ? scheme.error
+        : isOff
+        ? scheme.outlineVariant
+        : scheme.primary;
+    final foregroundColor = isFaulted
+        ? scheme.onErrorContainer
+        : isOff
+        ? scheme.onSurfaceVariant
+        : scheme.onPrimaryContainer;
     final statusColor = isFaulted
-        ? Theme.of(context).colorScheme.onErrorContainer
-        : state.isRunning
-        ? Theme.of(context).colorScheme.onPrimary
-        : Theme.of(context).colorScheme.primary;
+        ? scheme.error
+        : isOff
+        ? scheme.onSurfaceVariant
+        : scheme.primary;
+    NtcCardWidget ntc({required String label, String? value}) => NtcCardWidget(
+      label: label,
+      value: value,
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
+    );
     final actionLabel = state.communicationFailureStartedAt != null
         ? 'Haberleşme hatası'
         : state.isRunning
@@ -40,10 +59,12 @@ class UnitWidget extends StatelessWidget {
       turningOn: !state.isRunning,
     );
     return Opacity(
-      opacity: isFaulted ? 0.7 : 1,
+      opacity: isOff && !isFaulted ? 0.72 : 1,
       child: Card(
+        color: backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusGeometry.circular(8),
+          side: BorderSide(color: borderColor, width: isFaulted ? 2 : 1),
         ),
         margin: EdgeInsets.all(2),
         child: Container(
@@ -52,8 +73,14 @@ class UnitWidget extends StatelessWidget {
             children: [
               ListTile(
                 dense: true,
-                title: Text('Klima #$unitId'),
-                subtitle: Text(actionLabel),
+                title: Text(
+                  'Klima #$unitId',
+                  style: TextStyle(color: foregroundColor),
+                ),
+                subtitle: Text(
+                  actionLabel,
+                  style: TextStyle(color: foregroundColor),
+                ),
                 trailing: cooldown > 0
                     ? SizedBox(
                         width: 22,
@@ -76,32 +103,31 @@ class UnitWidget extends StatelessWidget {
                           Icons.power_settings_new,
                           color: statusColor,
                         ),
-                        color: statusBgColor,
                       ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'NTC 1',
                       value: state.ntc0 == null ? '-' : '${state.ntc0}°',
                     ),
                   ),
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'NTC 2',
                       value: state.ntc1 == null ? '-' : '${state.ntc1}°',
                     ),
                   ),
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'NTC 3',
                       value: state.ntc2 == null ? '-' : '${state.ntc2}°',
                     ),
                   ),
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'NTC 4',
                       value: state.ntc3 == null ? '-' : '${state.ntc3}°',
                     ),
@@ -112,7 +138,7 @@ class UnitWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'SET',
                       value: state.targetTemperature == null
                           ? '-'
@@ -120,19 +146,19 @@ class UnitWidget extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'FAN',
                       value: state.fanLevel == null ? '-' : '${state.fanLevel}',
                     ),
                   ),
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'DURUM',
                       value: state.isRunning ? 'ON' : 'OFF',
                     ),
                   ),
                   Expanded(
-                    child: NtcCardWidget(
+                    child: ntc(
                       label: 'HATA',
                       value: state.errorCode == 0x00
                           ? '-'

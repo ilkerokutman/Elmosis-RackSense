@@ -66,6 +66,16 @@ class AppController extends GetxController {
   RxInt get inputRevisionRx => _inputRevision;
   bool get isCabinetShutdownBlocked => _cabinetShutdownBlocked.value;
   DateTime? get nextAutoSwitchAt => _nextAutoSwitchAt;
+  double? get averageNtcTemperature {
+    final temperatures = units.values
+        .expand((unit) => unit.temperatures)
+        .whereType<int>()
+        .toList(growable: false);
+    if (temperatures.isEmpty) return null;
+    return temperatures.reduce((total, value) => total + value) /
+        temperatures.length;
+  }
+
   AcUnitState unitFor(int deviceId) =>
       _units[deviceId] ?? AcUnitState(deviceId: deviceId);
 
@@ -157,13 +167,20 @@ class AppController extends GetxController {
     if (value < 16 || value > 30) return;
     _desiredTemperature.value = value;
     setAutoMode(false);
-    final runningUnit = units.values
-        .where((unit) => unit.isRunning)
-        .firstOrNull;
-    if (runningUnit != null && runningUnit.targetTemperature != value) {
-      addToSerialMessageStack(
+    final targetUnit =
+        units.values.where((unit) => unit.isRunning).firstOrNull ??
+        units.values.where((unit) => unit.lastResponseAt != null).firstOrNull ??
+        unitFor(SerialKeys.device1);
+    if (targetUnit.targetTemperature != value) {
+      _messageStack.removeWhere(
+        (message) =>
+            message.device == targetUnit.deviceId &&
+            message.command == SerialKeys.cmdSetValue,
+      );
+      _messageStack.insert(
+        0,
         SerialMessage(
-          device: runningUnit.deviceId,
+          device: targetUnit.deviceId,
           command: SerialKeys.cmdSetValue,
           arg: value & 0xFF,
         ),
@@ -1105,6 +1122,10 @@ class AppController extends GetxController {
 
     // Poll all extension devices for inputs and outputs
     for (final deviceId in deviceIds.where((e) => e != mainboardId)) {
+      while (messageStack.isNotEmpty) {
+        await sendSerialMessageFromStack();
+        await waitForSerialResponse();
+      }
       // Read outputs
       // await sendSerialMessage(SerialMessage(device: deviceId, command: 0x69));
       // await waitForSerialResponse();
