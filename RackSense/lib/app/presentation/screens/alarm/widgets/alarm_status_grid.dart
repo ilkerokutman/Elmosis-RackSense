@@ -38,12 +38,12 @@ class AlarmStatusGrid extends StatelessWidget {
       builder: (context, constraints) {
         final crossAxisCount = (constraints.maxWidth ~/ 220).clamp(2, 4);
         return GridView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.55,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.45,
           ),
           itemCount: items.length,
           itemBuilder: (context, index) => _AlarmGridCard(item: items[index]),
