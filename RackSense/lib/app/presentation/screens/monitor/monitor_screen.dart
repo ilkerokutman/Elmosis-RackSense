@@ -191,9 +191,9 @@ class _MonitorScreenState extends State<MonitorScreen> {
 }
 
 enum _MonitorRange {
-  fiveMinutes(Duration(minutes: 5), 'Son 5 dk'),
-  hour(Duration(hours: 1), 'Son 1 saat'),
-  day(Duration(hours: 24), 'Son 24 saat');
+  fiveMinutes(Duration(minutes: 5), '5 dk'),
+  hour(Duration(hours: 1), '1 saat'),
+  day(Duration(hours: 24), '24 saat');
 
   const _MonitorRange(this.duration, this.label);
 
