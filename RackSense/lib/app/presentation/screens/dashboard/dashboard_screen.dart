@@ -57,13 +57,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Manuel'),
+                Text(
+                  'Manuel',
+                  style: TextStyle(
+                    color: controller.isAutoMode
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.3)
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                ),
                 Switch(
                   value: controller.isAutoMode,
                   onChanged: (v) =>
                       controller.setAutoMode(!controller.isAutoMode),
                 ),
-                Text('Otomatik'),
+                Text(
+                  'Otomatik',
+                  style: TextStyle(
+                    color: !controller.isAutoMode
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.3)
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ],
             ),
           ],
