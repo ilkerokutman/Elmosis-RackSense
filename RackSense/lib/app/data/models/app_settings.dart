@@ -11,6 +11,7 @@ class AppSettings {
     this.minimumTemperature = 16,
     this.maximumTemperature = 30,
     this.isDarkMode = true,
+    this.cameraStreamUrl = 'http://localhost:8080/video_feed',
     this.alarmInputs = _defaultAlarmInputs,
   });
 
@@ -50,6 +51,7 @@ class AppSettings {
   final int minimumTemperature;
   final int maximumTemperature;
   final bool isDarkMode;
+  final String cameraStreamUrl;
   final List<AlarmInputConfig> alarmInputs;
 
   AppSettings copyWith({
@@ -61,6 +63,7 @@ class AppSettings {
     int? minimumTemperature,
     int? maximumTemperature,
     bool? isDarkMode,
+    String? cameraStreamUrl,
     List<AlarmInputConfig>? alarmInputs,
   }) {
     return AppSettings(
@@ -75,6 +78,7 @@ class AppSettings {
       minimumTemperature: minimumTemperature ?? this.minimumTemperature,
       maximumTemperature: maximumTemperature ?? this.maximumTemperature,
       isDarkMode: isDarkMode ?? this.isDarkMode,
+      cameraStreamUrl: cameraStreamUrl ?? this.cameraStreamUrl,
       alarmInputs: alarmInputs ?? this.alarmInputs,
     );
   }
@@ -88,6 +92,7 @@ class AppSettings {
     'minimumTemperature': minimumTemperature,
     'maximumTemperature': maximumTemperature,
     'isDarkMode': isDarkMode,
+    'cameraStreamUrl': cameraStreamUrl,
     'alarmInputs': alarmInputs.map((input) => input.toJson()).toList(),
   };
 
@@ -103,6 +108,9 @@ class AppSettings {
       minimumTemperature: json['minimumTemperature'] as int? ?? 16,
       maximumTemperature: json['maximumTemperature'] as int? ?? 30,
       isDarkMode: json['isDarkMode'] as bool? ?? true,
+      cameraStreamUrl:
+          json['cameraStreamUrl'] as String? ??
+          'http://localhost:8080/video_feed',
       alarmInputs: inputData == null
           ? _defaultAlarmInputs
           : inputData

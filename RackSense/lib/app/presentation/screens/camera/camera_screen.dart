@@ -5,13 +5,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/alarm_controller.dart';
+import 'package:rack_sense/app/data/controllers/settings_controller.dart';
 import 'package:rack_sense/app/data/models/alarm_state.dart';
 import 'package:rack_sense/app/presentation/components/app_scaffold.dart';
 
 class CameraScreen extends StatelessWidget {
   const CameraScreen({super.key});
-
-  static const _mockCameraStreamUrl = 'http://localhost:8080/video_feed';
 
   @override
   Widget build(BuildContext context) {
@@ -22,26 +21,29 @@ class CameraScreen extends StatelessWidget {
               (alarm) => alarm.isActive && _doorKeys.contains(alarm.config.key),
             )
             .toList(growable: false);
-        return AppScaffold(
-          selectedIndex: 3,
-          title: 'RackSense: Kamera ve Güvenlik',
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final camera = _LiveCameraPanel(streamUrl: _mockCameraStreamUrl);
-              final security = _SecurityPanel(openDoors: openDoors);
+        return GetBuilder<SettingsController>(
+          builder: (settingsController) => AppScaffold(
+            selectedIndex: 3,
+            title: 'RackSense: Kamera ve Güvenlik',
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                final camera = _LiveCameraPanel(
+                  streamUrl: settingsController.settings.cameraStreamUrl,
+                );
+                final security = _SecurityPanel(openDoors: openDoors);
 
-              return Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  spacing: 8,
-                  children: [
-                    Expanded(flex: 3, child: camera),
-
-                    SizedBox(width: 280, child: security),
-                  ],
-                ),
-              );
-            },
+                return Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      Expanded(flex: 3, child: camera),
+                      SizedBox(width: 280, child: security),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         );
       },
@@ -89,7 +91,7 @@ class _LiveCameraPanel extends StatelessWidget {
           Expanded(
             child: ColoredBox(
               color: Colors.black,
-              child: _MjpegView(streamUrl: streamUrl),
+              child: _MjpegView(key: ValueKey(streamUrl), streamUrl: streamUrl),
             ),
           ),
         ],
@@ -99,7 +101,7 @@ class _LiveCameraPanel extends StatelessWidget {
 }
 
 class _MjpegView extends StatefulWidget {
-  const _MjpegView({required this.streamUrl});
+  const _MjpegView({super.key, required this.streamUrl});
 
   final String streamUrl;
 

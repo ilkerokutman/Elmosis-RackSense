@@ -37,6 +37,26 @@ class SettingsController extends GetxController {
     return updateSettings(settings.copyWith(isDarkMode: isDarkMode));
   }
 
+  Future<void> updateCameraStreamUrl(String value) {
+    final streamUrl = value.trim();
+    if (streamUrl.isEmpty) {
+      throw ArgumentError.value(
+        value,
+        'value',
+        'Video akış adresi boş olamaz.',
+      );
+    }
+    final uri = Uri.tryParse(streamUrl);
+    if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+      throw ArgumentError.value(
+        value,
+        'value',
+        'Geçerli bir video akış adresi girin.',
+      );
+    }
+    return updateSettings(settings.copyWith(cameraStreamUrl: streamUrl));
+  }
+
   Future<void> updateAlarmInput(
     String key, {
     MainboardInput? input,

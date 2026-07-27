@@ -61,6 +61,13 @@ class SystemSettingsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
+                Text('Kamera', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                _CameraStreamUrlCard(
+                  initialUrl: settings.cameraStreamUrl,
+                  controller: controller,
+                ),
+                const SizedBox(height: 20),
                 Text(
                   'Kabin Alarm Girişleri',
                   style: Theme.of(context).textTheme.titleLarge,
@@ -102,6 +109,90 @@ class SystemSettingsScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _CameraStreamUrlCard extends StatefulWidget {
+  const _CameraStreamUrlCard({
+    required this.initialUrl,
+    required this.controller,
+  });
+
+  final String initialUrl;
+  final SettingsController controller;
+
+  @override
+  State<_CameraStreamUrlCard> createState() => _CameraStreamUrlCardState();
+}
+
+class _CameraStreamUrlCardState extends State<_CameraStreamUrlCard> {
+  late final TextEditingController _urlController;
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController = TextEditingController(text: widget.initialUrl);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CameraStreamUrlCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialUrl != widget.initialUrl &&
+        _urlController.text != widget.initialUrl) {
+      _urlController.text = widget.initialUrl;
+    }
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const Icon(Icons.videocam_outlined),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: _urlController,
+                keyboardType: TextInputType.url,
+                decoration: const InputDecoration(
+                  labelText: 'Video akış adresi',
+                  hintText: 'http://localhost:8080/video_feed',
+                ),
+                onSubmitted: (_) => _save(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            FilledButton(
+              onPressed: () => _save(context),
+              child: const Text('Kaydet'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _save(BuildContext context) async {
+    try {
+      await widget.controller.updateCameraStreamUrl(_urlController.text);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Video akış adresi kaydedildi.')),
+      );
+    } on ArgumentError catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message?.toString() ?? 'Geçersiz adres.')),
+      );
+    }
   }
 }
 
