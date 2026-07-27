@@ -58,10 +58,17 @@ class SerialQueueStatusWidget extends StatelessWidget {
 
     final current = controller.currentSerialMessage;
     if (current != null) {
+      final isConnectivityProbe = current.command == SerialKeys.cmdCommTest;
       final isUserCommand = _isUserCommand(current);
       return _QueueStatus(
-        icon: isUserCommand ? Icons.upload : Icons.sync,
-        message: isUserCommand
+        icon: isConnectivityProbe
+            ? Icons.settings_ethernet
+            : isUserCommand
+            ? Icons.upload
+            : Icons.sync,
+        message: isConnectivityProbe
+            ? 'Checking Klima #${current.device} connection…'
+            : isUserCommand
             ? 'Sending ${_commandLabel(current)}…'
             : 'Reading Klima #${current.device}…',
         color: isUserCommand ? _StatusColor.warning : _StatusColor.primary,
@@ -89,7 +96,8 @@ class SerialQueueStatusWidget extends StatelessWidget {
   }
 
   bool _isUserCommand(SerialMessage message) =>
-      message.command < SerialKeys.cmdReadValue;
+      message.command < SerialKeys.cmdReadValue &&
+      message.command != SerialKeys.cmdCommTest;
 
   String _commandLabel(SerialMessage message) {
     final device = 'Klima #${message.device}';

@@ -978,6 +978,10 @@ class AppController extends GetxController {
       clearCommunicationFailureStartedAt: true,
     );
     _units[deviceId] = updated;
+    if (_isTemperatureControlUnit(deviceId) &&
+        !_hasPendingSetValueCommand(deviceId)) {
+      _desiredTemperature.value = updated.targetTemperature!;
+    }
     _evaluateAutomation(updated);
 
     if (previous.isRunning != isRunning) {
@@ -1003,6 +1007,27 @@ class AppController extends GetxController {
       );
     }
     update();
+  }
+
+  bool _isTemperatureControlUnit(int deviceId) {
+    final connectedUnits = units.values.where(
+      (unit) => unit.isConnected && unit.targetTemperature != null,
+    );
+    final unit =
+        connectedUnits.where((unit) => unit.isRunning).firstOrNull ??
+        connectedUnits.where((unit) => unit.lastResponseAt != null).firstOrNull;
+    return unit?.deviceId == deviceId;
+  }
+
+  bool _hasPendingSetValueCommand(int deviceId) {
+    final current = currentSerialMessage;
+    return (current?.device == deviceId &&
+            current?.command == SerialKeys.cmdSetValue) ||
+        messageStack.any(
+          (message) =>
+              message.device == deviceId &&
+              message.command == SerialKeys.cmdSetValue,
+        );
   }
 
   void _evaluateAutomation(AcUnitState unit) {
@@ -1142,14 +1167,13 @@ class AppController extends GetxController {
         await waitForSerialResponse();
       }
       if (!_shouldPollDevice(deviceId)) continue;
-      // Read outputs
-      // await sendSerialMessage(SerialMessage(device: deviceId, command: 0x69));
-      // await waitForSerialResponse();
-
-      // Read inputs
-      print('sending msg');
+      final isRecoveryProbe = !unitFor(deviceId).isConnected;
+      final command = isRecoveryProbe
+          ? SerialKeys.cmdCommTest
+          : SerialKeys.cmdReadAll;
+      print(isRecoveryProbe ? 'sending connection probe' : 'sending msg');
       await sendSerialMessage(
-        SerialMessage(device: deviceId, command: SerialKeys.cmdReadAll),
+        SerialMessage(device: deviceId, command: command),
       );
 
       print('waiting response');
