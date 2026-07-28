@@ -29,29 +29,7 @@ class SystemSettingsScreen extends StatelessWidget {
                 Card(
                   child: Column(
                     children: [
-                      ListTile(
-                        title: const Text('Otomatik geçiş aralığı'),
-                        subtitle: Text(
-                          '${settings.autoSwitchIntervalMinutes} dakika',
-                        ),
-                        trailing: SizedBox(
-                          width: 280,
-                          child: Slider(
-                            min: 30,
-                            max: 720,
-                            divisions: 23,
-                            value: settings.autoSwitchIntervalMinutes
-                                .clamp(30, 720)
-                                .toDouble(),
-                            label: '${settings.autoSwitchIntervalMinutes} dk.',
-                            onChanged: (value) {
-                              controller.updateAutoSwitchInterval(
-                                value.round(),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
+                      _AutoSwitchIntervalTile(controller: controller),
                       SwitchListTile(
                         title: const Text('Koyu tema'),
                         value: settings.isDarkMode,
@@ -109,6 +87,63 @@ class SystemSettingsScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _AutoSwitchIntervalTile extends StatelessWidget {
+  const _AutoSwitchIntervalTile({required this.controller});
+
+  static const int _minMinutes = 5;
+  static const int _maxMinutes = 72 * 60;
+
+  final SettingsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalMinutes = controller.settings.autoSwitchIntervalMinutes.clamp(
+      _minMinutes,
+      _maxMinutes,
+    );
+    final hour = totalMinutes ~/ 60;
+    final minute = totalMinutes % 60;
+
+    return ListTile(
+      title: const Text('Otomatik geçiş aralığı'),
+      subtitle: Text('$hour sa. $minute dk.'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DropdownButton<int>(
+            value: hour,
+            items: [
+              for (var h = 0; h <= 72; h++)
+                DropdownMenuItem(value: h, child: Text('$h sa.')),
+            ],
+            onChanged: (value) {
+              if (value == null) return;
+              _updateInterval(hour: value, minute: minute);
+            },
+          ),
+          const SizedBox(width: 12),
+          DropdownButton<int>(
+            value: minute,
+            items: [
+              for (var m = 0; m < 60; m += 5)
+                DropdownMenuItem(value: m, child: Text('$m dk.')),
+            ],
+            onChanged: (value) {
+              if (value == null) return;
+              _updateInterval(hour: hour, minute: value);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _updateInterval({required int hour, required int minute}) {
+    final totalMinutes = (hour * 60 + minute).clamp(_minMinutes, _maxMinutes);
+    controller.updateAutoSwitchInterval(totalMinutes);
   }
 }
 

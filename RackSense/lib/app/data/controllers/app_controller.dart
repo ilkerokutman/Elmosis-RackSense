@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:dart_periphery/dart_periphery.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rack_sense/app/core/constants/serial.dart';
 import 'package:rack_sense/app/core/routes/routes.dart';
@@ -626,16 +627,68 @@ class AppController extends GetxController {
   }
 
   Future<void> _navigateForButton(int number) async {
-    final route = switch (number) {
-      1 => Routes.dashboard,
-      2 => Routes.monitor,
-      3 => Routes.alarm,
-      4 => Routes.camera,
-      _ => null,
-    };
-    if (route == null || Get.currentRoute == route) return;
     await soundTap();
-    Get.offAllNamed(route);
+    switch (number) {
+      case 1:
+        _showShutdownDialog();
+        return;
+      case 2:
+        setAutoMode(true);
+        break;
+      case 3:
+        switchToManualSingleUnit(SerialKeys.device1);
+        break;
+      case 4:
+        switchToManualSingleUnit(SerialKeys.device2);
+        break;
+      default:
+        return;
+    }
+    if (Get.currentRoute != Routes.dashboard) {
+      Get.offAllNamed(Routes.dashboard);
+    }
+  }
+
+  /// Switches to manual mode and ensures only [deviceId] is running,
+  /// turning the other AC unit off (subject to its cooldown safety check).
+  void switchToManualSingleUnit(int deviceId) {
+    setAutoMode(false);
+    final otherDeviceId = deviceId == SerialKeys.device1
+        ? SerialKeys.device2
+        : SerialKeys.device1;
+    if (unitFor(otherDeviceId).isRunning) {
+      requestTurnOff(otherDeviceId, isAutomatic: true);
+    }
+    if (!unitFor(deviceId).isRunning) {
+      requestTurnOn(deviceId, isAutomatic: true);
+    }
+  }
+
+  void _showShutdownDialog() {
+    if (Get.isDialogOpen ?? false) return;
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Sistemi kapatmak istediğinizden emin misiniz?'),
+        actions: [
+          TextButton(onPressed: Get.back, child: const Text('İptal')),
+          FilledButton(
+            onPressed: () {
+              Get.back();
+              unawaited(shutdownPi());
+            },
+            child: const Text('Sistemi Kapat'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> shutdownPi() async {
+    try {
+      await Process.run('sudo', ['shutdown', '-h', 'now']);
+    } on Exception catch (e) {
+      print('ERROR shutting down: $e');
+    }
   }
 
   void pollNtcSensors() {

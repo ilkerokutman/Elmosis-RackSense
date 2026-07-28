@@ -8,11 +8,13 @@ class AppScaffold extends StatelessWidget {
     required this.selectedIndex,
     required this.body,
     this.title,
+    this.titleWidget,
     this.actions,
   });
   final int selectedIndex;
   final Widget body;
   final String? title;
+  final Widget? titleWidget;
   final List<Widget>? actions;
 
   @override
@@ -25,7 +27,11 @@ class AppScaffold extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                AppBarWidget(title: title, actions: actions),
+                AppBarWidget(
+                  title: title,
+                  titleWidget: titleWidget,
+                  actions: actions,
+                ),
                 Divider(),
                 Expanded(child: body),
               ],
