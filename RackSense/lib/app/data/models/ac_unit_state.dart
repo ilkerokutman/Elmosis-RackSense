@@ -10,7 +10,7 @@ class AcUnitState {
     this.ntc3,
     this.fanLevel,
     this.isRunning = false,
-    this.isConnected = true,
+    this.isConnected = false,
     this.nextProbeAt,
     this.lastResponseAt,
     this.lastTurnedOnAt,

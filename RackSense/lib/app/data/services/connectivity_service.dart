@@ -18,12 +18,16 @@ class ConnectivityService extends GetxController {
   void Function(bool isConnected)? onConnectionChanged;
 
   Future<void> initialize() async {
-    final results = await _connectivity.checkConnectivity();
-    _updateConnectionStatus(results);
-
-    _subscription = _connectivity.onConnectivityChanged.listen((results) {
+    try {
+      final results = await _connectivity.checkConnectivity();
       _updateConnectionStatus(results);
-    });
+      _subscription = _connectivity.onConnectivityChanged.listen(
+        _updateConnectionStatus,
+        onError: (_) => _setOffline(),
+      );
+    } on Object catch (_) {
+      _setOffline();
+    }
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> results) {
@@ -44,9 +48,17 @@ class ConnectivityService extends GetxController {
   }
 
   Future<bool> checkConnection() async {
-    final results = await _connectivity.checkConnectivity();
-    _updateConnectionStatus(results);
+    try {
+      final results = await _connectivity.checkConnectivity();
+      _updateConnectionStatus(results);
+    } on Object catch (_) {
+      _setOffline();
+    }
     return _isConnected.value;
+  }
+
+  void _setOffline() {
+    _updateConnectionStatus(const [ConnectivityResult.none]);
   }
 
   Future<bool> hasInternetAccess() async {

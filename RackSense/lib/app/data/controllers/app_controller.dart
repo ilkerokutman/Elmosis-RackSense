@@ -51,8 +51,14 @@ class AppController extends GetxController {
   StreamSubscription<Uint8List>? _serialMessageSubscription;
 
   final RxMap<int, AcUnitState> _units = <int, AcUnitState>{
-    SerialKeys.device1: const AcUnitState(deviceId: SerialKeys.device1),
-    SerialKeys.device2: const AcUnitState(deviceId: SerialKeys.device2),
+    SerialKeys.device1: const AcUnitState(
+      deviceId: SerialKeys.device1,
+      isConnected: false,
+    ),
+    SerialKeys.device2: const AcUnitState(
+      deviceId: SerialKeys.device2,
+      isConnected: false,
+    ),
   }.obs;
   final RxBool _isAutoMode = false.obs;
   final RxInt _desiredTemperature = 23.obs;
@@ -311,24 +317,28 @@ class AppController extends GetxController {
 
   //region MARK: init
   Future<void> _initializeApp() async {
-    _initStatus.value = 'Loading devices...';
-    update();
-    await Future.delayed(const Duration(milliseconds: 50));
-    _initializeDevices();
+    try {
+      _initStatus.value = 'Cihazlar hazırlanıyor...';
+      update();
+      await Future.delayed(const Duration(milliseconds: 50));
+      _initializeDevices();
 
-    _initStatus.value = 'Initializing GPIO...';
-    update();
-    await Future.delayed(const Duration(milliseconds: 50));
-    await _initializeGpio();
+      _initStatus.value = 'GPIO hazırlanıyor...';
+      update();
+      await Future.delayed(const Duration(milliseconds: 50));
+      await _initializeGpio();
 
-    _initStatus.value = 'Initializing Serial...';
-    update();
-    await Future.delayed(const Duration(milliseconds: 50));
-    await _initializeSerial();
-
-    _isInitializing.value = false;
-    print('Initialization complete');
-    update();
+      _initStatus.value = 'Seri bağlantı hazırlanıyor...';
+      update();
+      await Future.delayed(const Duration(milliseconds: 50));
+      await _initializeSerial();
+    } on Object catch (error) {
+      print('Başlatma hatası: $error');
+      _initStatus.value = 'Donanım bağlantısı olmadan çalışıyor';
+    } finally {
+      _isInitializing.value = false;
+      update();
+    }
   }
   //endregion
 
