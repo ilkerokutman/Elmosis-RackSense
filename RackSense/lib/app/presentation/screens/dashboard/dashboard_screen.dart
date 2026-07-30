@@ -53,7 +53,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         return AppScaffold(
           selectedIndex: 0,
-          title: 'RackSense: Kontrol',
+          titleWidget: Image.asset(
+            'assets/images/lande_logo.png',
+            height: AppBar().preferredSize.height - 12,
+            fit: BoxFit.contain,
+            alignment: Alignment.centerLeft,
+          ),
           actions: [
             Row(
               mainAxisSize: MainAxisSize.min,

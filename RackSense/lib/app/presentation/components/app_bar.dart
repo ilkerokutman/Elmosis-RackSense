@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:rack_sense/app/data/controllers/app_controller.dart';
 
 class AppBarWidget extends StatelessWidget {
-  const AppBarWidget({super.key, this.title, this.actions});
+  const AppBarWidget({super.key, this.title, this.titleWidget, this.actions});
   final String? title;
+  final Widget? titleWidget;
   final List<Widget>? actions;
 
   @override
@@ -12,7 +13,7 @@ class AppBarWidget extends StatelessWidget {
     return GetBuilder<AppController>(
       builder: (ac) {
         return AppBar(
-          title: Text(title ?? 'RackSense'),
+          title: titleWidget ?? Text(title ?? 'RackSense'),
           actions: [
             ...?actions,
 
