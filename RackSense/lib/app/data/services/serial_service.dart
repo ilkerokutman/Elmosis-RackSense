@@ -14,7 +14,7 @@ const int kSerialLoopDelay = 3000;
 const int kNormalMessageLength = 7;
 const int kEchoMessageLength = 9;
 const int kReadAllMessageLength = 15;
-const int kSerialResponseTimeoutMillis = 2000;
+const int kSerialResponseTimeoutMillis = 500;
 
 class SerialService {
   SerialPort? _serialPort;
@@ -60,7 +60,6 @@ class SerialService {
       _messageSubscription?.cancel();
       _messageSubscription = _serialPortReader!.stream.listen(
         (Uint8List data) {
-          print('message received ${data.length} bytes');
           _handler.onDataReceived(data);
         },
         onError: (error) {
@@ -146,7 +145,6 @@ class SerialService {
       }
 
       setTxEnable(true);
-      print('serial tx: frame sent in ${stopwatch.elapsedMilliseconds}ms');
     } catch (e) {
       print('serial send error: ${e.toString()}');
     }

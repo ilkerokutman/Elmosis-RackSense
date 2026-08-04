@@ -657,10 +657,10 @@ class AppController extends GetxController {
         setAutoMode(true);
         break;
       case 3:
-        requestManualTurnOn(SerialKeys.device1);
+        requestManualToggle(SerialKeys.device1);
         break;
       case 4:
-        requestManualTurnOn(SerialKeys.device2);
+        requestManualToggle(SerialKeys.device2);
         break;
       default:
         return;
@@ -670,11 +670,13 @@ class AppController extends GetxController {
     }
   }
 
-  /// Disables auto mode and turns on the requested AC unit, leaving the
-  /// other unit untouched so both may run simultaneously in manual mode.
-  void requestManualTurnOn(int deviceId) {
+  /// Disables auto mode and toggles the requested AC unit on or off,
+  /// respecting the cooldown checks in [canTurnOn] and [canTurnOff].
+  void requestManualToggle(int deviceId) {
     setAutoMode(false);
-    if (!unitFor(deviceId).isRunning) {
+    if (unitFor(deviceId).isRunning) {
+      requestTurnOff(deviceId);
+    } else {
       requestTurnOn(deviceId);
     }
   }
@@ -937,17 +939,8 @@ class AppController extends GetxController {
   void _parseSerialMessage(List<int> data) {
     final deviceId = data[1];
     final commandByte = data[2];
-    final index = data[3];
-    final args = data[4];
     final sentMessage = currentSerialMessage;
     final sentCommand = sentMessage?.command ?? -1;
-
-    print(
-      '<<<< D:0x${deviceId.toRadixString(16).padLeft(2, '0')} '
-      'C:0x${commandByte.toRadixString(16).padLeft(2, '0')} '
-      'I:0x${index.toRadixString(16).padLeft(2, '0')} '
-      'A:0x${args.toRadixString(16).padLeft(2, '0')}',
-    );
 
     // Clear current message if this is the response.
     // Read-value replies replace the command byte with the value itself,
@@ -963,65 +956,10 @@ class AppController extends GetxController {
     }
 
     switch (sentCommand) {
-      case SerialKeys.cmdCommTest:
-        print(
-          'CommTest echo: ${SerialUtils.bytesToHex(Uint8List.fromList(data))}',
-        );
-      case SerialKeys.cmdReset:
-        print('Reset acknowledged');
-      case SerialKeys.cmdSetValue:
-        print(
-          'Set Value acknowledged: ${args.toSigned(8)}°C '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdTurnOn:
-        print('Turn On acknowledged');
-      case SerialKeys.cmdTurnOff:
-        print('Turn Off acknowledged');
-      case SerialKeys.cmdReadValue:
-        print(
-          'Read Set Value: ${args.toSigned(8)}°C '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdReadNtc0:
-        print(
-          'Read NTC0: ${args.toSigned(8)}°C '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdReadNtc1:
-        print(
-          'Read NTC1: ${args.toSigned(8)}°C '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdReadNtc2:
-        print(
-          'Read NTC2: ${args.toSigned(8)}°C '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdReadNtc3:
-        print(
-          'Read NTC3: ${args.toSigned(8)}°C '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdReadOutputs:
-        print(
-          'Read Output Pins: '
-          '0b${args.toRadixString(2).padLeft(8, '0')} '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdReadInputs:
-        print(
-          'Read Input Pins: '
-          '0b${args.toRadixString(2).padLeft(8, '0')} '
-          '(0x${args.toRadixString(16).padLeft(2, '0')})',
-        );
-      case SerialKeys.cmdReadFanLevel:
-        print('Read Fan Level: ${args.toSigned(8)}');
       case SerialKeys.cmdReadAll:
         _updateUnitFromReadAll(deviceId, data);
-        _printReadAllValues(data);
       default:
-        print('unknown serial command received');
+        break;
     }
   }
 
@@ -1178,44 +1116,6 @@ class AppController extends GetxController {
     update();
   }
 
-  void _printReadAllValues(List<int> data) {
-    final values = data.sublist(3, data.length - 2);
-    final hex = values
-        .map((b) => '0x${b.toRadixString(16).padLeft(2, '0')}')
-        .join(' ');
-    print('Read All Values (${values.length} bytes): $hex');
-
-    final labels = [
-      'ErrorCode',
-      'DeviceStatus',
-      'SetValue',
-      'NTC0',
-      'NTC1',
-      'NTC2',
-      'NTC3',
-      'Outputs',
-      'Inputs',
-      'FanLevel',
-    ];
-    final mapped = <String>[];
-    for (var i = 0; i < values.length && i < labels.length; i++) {
-      final label = labels[i];
-      final value = values[i];
-      final String display;
-      if (label.startsWith('NTC') || label == 'SetValue') {
-        display = '${value.toSigned(8)}°C';
-      } else if (label == 'FanLevel') {
-        display = '${value.toSigned(8)}';
-      } else if (label == 'Outputs' || label == 'Inputs') {
-        display = '0b${value.toRadixString(2).padLeft(8, '0')}';
-      } else {
-        display = '0x${value.toRadixString(16).padLeft(2, '0')}';
-      }
-      mapped.add('$label=$display');
-    }
-    print('  ${mapped.join(', ')}');
-  }
-
   void _setTxEnable(bool value) {
     final gpioValue = invertUartTx ? !value : value;
     uartModeTx?.write(gpioValue);
@@ -1229,10 +1129,6 @@ class AppController extends GetxController {
 
   Future<void> sendSerialMessage(SerialMessage m) async {
     final bytes = m.toBytesWithCrc();
-    final hexStr = bytes
-        .map((b) => b.toRadixString(16).padLeft(2, '0').toUpperCase())
-        .join(' ');
-    print('>>>> $hexStr');
 
     _currentSerialMessage.value = m;
     update();
@@ -1246,7 +1142,6 @@ class AppController extends GetxController {
 
   Future<void> sendSerialMessageFromStack() async {
     if (_messageStack.isNotEmpty) {
-      print('Taking message from stack (${_messageStack.length} remaining)');
       SerialMessage m = _messageStack.removeAt(0);
       await sendSerialMessage(m);
     }
@@ -1255,7 +1150,6 @@ class AppController extends GetxController {
   void turnOnSerialLoop() {
     _allowSerialLoop.value = true;
     update();
-    print('Serial loop enabled');
     runSerialLoop();
   }
 
@@ -1263,7 +1157,6 @@ class AppController extends GetxController {
     _allowSerialLoop.value = false;
     _processingSerialLoop.value = false;
     update();
-    print('Serial loop disabled');
   }
 
   Future<void> runSerialLoop() async {
@@ -1285,13 +1178,10 @@ class AppController extends GetxController {
       final command = isRecoveryProbe
           ? SerialKeys.cmdCommTest
           : SerialKeys.cmdReadAll;
-      print(isRecoveryProbe ? 'sending connection probe' : 'sending msg');
       await sendSerialMessage(
         SerialMessage(device: deviceId, command: command),
       );
-      print('waiting response');
       await waitForSerialResponse();
-      print('waited response');
     }
 
     _processingSerialLoop.value = false;
@@ -1324,7 +1214,6 @@ class AppController extends GetxController {
       timeoutMillis += pollStepMillis;
       await CU.wait(pollStepMillis);
       if (timeoutMillis >= kSerialResponseTimeoutMillis) {
-        print('ERROR: Serial response timeout');
         _markCommunicationTimeout(currentSerialMessage!.device);
         _currentSerialMessage.value = null;
         update();

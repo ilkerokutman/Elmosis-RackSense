@@ -24,7 +24,9 @@ class AppBarWidget extends StatelessWidget {
             ...?actions,
 
             if (ac.isAutoMode && ac.nextAutoSwitchAt != null)
-              _AutoSwitchCountdown(nextAutoSwitchAt: ac.nextAutoSwitchAt!),
+              _AutoSwitchCountdown(nextAutoSwitchAt: ac.nextAutoSwitchAt!)
+            else
+              const SizedBox(width: 88),
 
             SizedBox(width: 8),
 
