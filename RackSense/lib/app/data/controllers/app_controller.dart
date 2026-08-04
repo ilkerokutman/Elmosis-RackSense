@@ -213,15 +213,19 @@ class AppController extends GetxController {
   void requestTurnOn(int deviceId, {bool isAutomatic = false}) {
     if (unitFor(deviceId).isRunning || !canTurnOn(deviceId)) return;
     if (!isAutomatic) setAutoMode(false);
-    final otherDeviceId = deviceId == SerialKeys.device1
-        ? SerialKeys.device2
-        : SerialKeys.device1;
-    final otherUnit = unitFor(otherDeviceId);
-    if (otherUnit.isRunning) {
-      if (!canTurnOff(otherDeviceId)) return;
-      addToSerialMessageStack(
-        SerialMessage(device: otherDeviceId, command: SerialKeys.cmdTurnOff),
-      );
+    // In automatic mode we still rotate: only one unit runs at a time.
+    // In manual mode the user may run both units simultaneously.
+    if (isAutomatic) {
+      final otherDeviceId = deviceId == SerialKeys.device1
+          ? SerialKeys.device2
+          : SerialKeys.device1;
+      final otherUnit = unitFor(otherDeviceId);
+      if (otherUnit.isRunning) {
+        if (!canTurnOff(otherDeviceId)) return;
+        addToSerialMessageStack(
+          SerialMessage(device: otherDeviceId, command: SerialKeys.cmdTurnOff),
+        );
+      }
     }
     addToSerialMessageStack(
       SerialMessage(device: deviceId, command: SerialKeys.cmdTurnOn),
@@ -636,10 +640,10 @@ class AppController extends GetxController {
         setAutoMode(true);
         break;
       case 3:
-        switchToManualSingleUnit(SerialKeys.device1);
+        requestManualTurnOn(SerialKeys.device1);
         break;
       case 4:
-        switchToManualSingleUnit(SerialKeys.device2);
+        requestManualTurnOn(SerialKeys.device2);
         break;
       default:
         return;
@@ -649,18 +653,12 @@ class AppController extends GetxController {
     }
   }
 
-  /// Switches to manual mode and ensures only [deviceId] is running,
-  /// turning the other AC unit off (subject to its cooldown safety check).
-  void switchToManualSingleUnit(int deviceId) {
+  /// Disables auto mode and turns on the requested AC unit, leaving the
+  /// other unit untouched so both may run simultaneously in manual mode.
+  void requestManualTurnOn(int deviceId) {
     setAutoMode(false);
-    final otherDeviceId = deviceId == SerialKeys.device1
-        ? SerialKeys.device2
-        : SerialKeys.device1;
-    if (unitFor(otherDeviceId).isRunning) {
-      requestTurnOff(otherDeviceId, isAutomatic: true);
-    }
     if (!unitFor(deviceId).isRunning) {
-      requestTurnOn(deviceId, isAutomatic: true);
+      requestTurnOn(deviceId);
     }
   }
 
