@@ -10,11 +10,13 @@ import 'package:rack_sense/app/core/constants/serial.dart';
 import 'package:rack_sense/app/core/routes/routes.dart';
 import 'package:rack_sense/app/core/utils/common_utils.dart';
 import 'package:rack_sense/app/data/models/ac_unit_state.dart';
+import 'package:rack_sense/app/data/models/app_settings.dart';
 import 'package:rack_sense/app/data/models/mainboard_input.dart';
 import 'package:rack_sense/app/data/models/pin_state.dart';
 import 'package:rack_sense/app/data/repositories/telemetry_repository.dart';
 import 'package:rack_sense/app/data/services/connectivity_service.dart';
 import 'package:rack_sense/app/data/services/serial_service.dart';
+import 'package:rack_sense/app/data/services/settings_service.dart';
 
 const List<int> eightInts = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 const List<int> sixInts = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06];
@@ -29,6 +31,7 @@ class AppController extends GetxController {
   late final ConnectivityService _connectivityService;
   late final SerialService _serialService;
   late final TelemetryRepository _telemetryRepository;
+  late final SettingsService _settingsService;
   GPIO? uartModeTx;
   GPIO? btn1;
   GPIO? btn2;
@@ -67,6 +70,7 @@ class AppController extends GetxController {
   final RxBool _cabinetShutdownBlocked = false.obs;
   final Set<int> _handledFailureDevices = <int>{};
   final Map<int, int> _communicationTimeoutCounts = <int, int>{};
+  final Map<int, int> _skipPollCounts = <int, int>{};
   bool _isBuzzerPatternRunning = false;
 
   DateTime? _nextAutoSwitchAt;
@@ -172,7 +176,11 @@ class AppController extends GetxController {
   void setAutoMode(bool enabled) {
     _isAutoMode.value = enabled;
     _nextAutoSwitchAt = enabled
-        ? DateTime.now().add(const Duration(hours: 4))
+        ? DateTime.now().add(
+            Duration(
+              minutes: _settingsService.settings.autoSwitchIntervalMinutes,
+            ),
+          )
         : null;
     update();
   }
@@ -271,6 +279,7 @@ class AppController extends GetxController {
     _connectivityService = Get.find<ConnectivityService>();
     _serialService = Get.find<SerialService>();
     _telemetryRepository = TelemetryRepository(Get.find());
+    _settingsService = Get.find<SettingsService>();
 
     _syncInitialValues();
     _setupEverListeners();
@@ -312,6 +321,14 @@ class AppController extends GetxController {
     ever(_connectivityService.isConnectedRx, (isConnected) {
       _isOnline.value = isConnected;
       update();
+    });
+    ever(_settingsService.settingsRx, (AppSettings settings) {
+      if (isAutoMode && _nextAutoSwitchAt != null) {
+        _nextAutoSwitchAt = DateTime.now().add(
+          Duration(minutes: settings.autoSwitchIntervalMinutes),
+        );
+        update();
+      }
     });
   }
 
@@ -1155,7 +1172,9 @@ class AppController extends GetxController {
         ? SerialKeys.device2
         : SerialKeys.device1;
     requestTurnOn(rotationDeviceId, isAutomatic: true);
-    _nextAutoSwitchAt = now.add(const Duration(hours: 4));
+    _nextAutoSwitchAt = now.add(
+      Duration(minutes: _settingsService.settings.autoSwitchIntervalMinutes),
+    );
     update();
   }
 
@@ -1253,12 +1272,14 @@ class AppController extends GetxController {
     _processingSerialLoop.value = true;
     update();
 
-    // Poll all extension devices for inputs and outputs
+    // 1. Send any queued commands first.
+    while (messageStack.isNotEmpty) {
+      await sendSerialMessageFromStack();
+      await waitForSerialResponse();
+    }
+
+    // 2. Query each extension device sequentially.
     for (final deviceId in deviceIds.where((e) => e != mainboardId)) {
-      while (messageStack.isNotEmpty) {
-        await sendSerialMessageFromStack();
-        await waitForSerialResponse();
-      }
       if (!_shouldPollDevice(deviceId)) continue;
       final isRecoveryProbe = !unitFor(deviceId).isConnected;
       final command = isRecoveryProbe
@@ -1268,16 +1289,9 @@ class AppController extends GetxController {
       await sendSerialMessage(
         SerialMessage(device: deviceId, command: command),
       );
-
       print('waiting response');
       await waitForSerialResponse();
       print('waited response');
-    }
-
-    // Process any queued messages
-    while (messageStack.isNotEmpty) {
-      await sendSerialMessageFromStack();
-      await waitForSerialResponse();
     }
 
     _processingSerialLoop.value = false;
@@ -1303,14 +1317,13 @@ class AppController extends GetxController {
     }
 
     int timeoutMillis = 0;
-    final maxTimeout = currentSerialMessage!.command == SerialKeys.cmdReadAll
-        ? kReadAllTimeoutMillis
-        : 1000;
+    const pollStepMillis = 10;
 
-    while (currentSerialMessage != null && timeoutMillis < maxTimeout) {
-      timeoutMillis++;
-      await CU.wait(1);
-      if (timeoutMillis >= maxTimeout) {
+    while (currentSerialMessage != null &&
+        timeoutMillis < kSerialResponseTimeoutMillis) {
+      timeoutMillis += pollStepMillis;
+      await CU.wait(pollStepMillis);
+      if (timeoutMillis >= kSerialResponseTimeoutMillis) {
         print('ERROR: Serial response timeout');
         _markCommunicationTimeout(currentSerialMessage!.device);
         _currentSerialMessage.value = null;
@@ -1322,14 +1335,20 @@ class AppController extends GetxController {
 
   bool _shouldPollDevice(int deviceId) {
     final unit = unitFor(deviceId);
-    return unit.isConnected ||
-        unit.nextProbeAt == null ||
-        !DateTime.now().isBefore(unit.nextProbeAt!);
+    if (unit.isConnected) return true;
+
+    final skipRemaining = _skipPollCounts[deviceId] ?? 0;
+    if (skipRemaining > 0) {
+      _skipPollCounts[deviceId] = skipRemaining - 1;
+      return false;
+    }
+    return true;
   }
 
   void _markDeviceConnected(int deviceId) {
     if (deviceId == mainboardId) return;
     _communicationTimeoutCounts.remove(deviceId);
+    _skipPollCounts.remove(deviceId);
     final previous = unitFor(deviceId);
     if (previous.isConnected && previous.nextProbeAt == null) return;
     _units[deviceId] = previous.copyWith(
@@ -1342,15 +1361,17 @@ class AppController extends GetxController {
 
   void _markCommunicationTimeout(int deviceId) {
     final now = DateTime.now();
-    final count = (_communicationTimeoutCounts[deviceId] ?? 0) + 1;
-    _communicationTimeoutCounts[deviceId] = count;
+    var count = (_communicationTimeoutCounts[deviceId] ?? 0) + 1;
     final previous = unitFor(deviceId);
     final isDisconnected = count >= maxConsecutiveCommunicationTimeouts;
+    if (isDisconnected) {
+      _skipPollCounts[deviceId] = 100;
+      count = 0;
+    }
+    _communicationTimeoutCounts[deviceId] = count;
     final updated = previous.copyWith(
       isConnected: !isDisconnected,
-      nextProbeAt: isDisconnected
-          ? now.add(disconnectedUnitProbeInterval)
-          : null,
+      clearNextProbeAt: true,
       communicationFailureStartedAt:
           previous.communicationFailureStartedAt ?? now,
     );

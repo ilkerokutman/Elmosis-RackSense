@@ -10,11 +10,11 @@ const int kStartByte = 0x3A;
 const List<int> kStopBytes = [0x0D, 0x0A];
 const String kSserialPort = '/dev/ttyS0';
 const int kSerialAcknowledgementDelay = 91;
-const int kSerialLoopDelay = 1000;
+const int kSerialLoopDelay = 3000;
 const int kNormalMessageLength = 7;
 const int kEchoMessageLength = 9;
 const int kReadAllMessageLength = 15;
-const int kReadAllTimeoutMillis = 5000;
+const int kSerialResponseTimeoutMillis = 2000;
 
 class SerialService {
   SerialPort? _serialPort;
