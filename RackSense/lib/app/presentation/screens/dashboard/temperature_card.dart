@@ -4,16 +4,18 @@ class TemperatureControlCardWidget extends StatelessWidget {
   const TemperatureControlCardWidget({
     super.key,
     required this.value,
-    required this.actualTemperature,
+    required this.unitATemperature,
+    required this.unitBTemperature,
     required this.onDecrease,
     required this.onIncrease,
   });
 
   final int value;
-  final double? actualTemperature;
+  final double? unitATemperature;
+  final double? unitBTemperature;
   final VoidCallback onDecrease;
   final VoidCallback onIncrease;
-  // actual temperature
+  // actual temperatures per unit
 
   @override
   Widget build(BuildContext context) {
@@ -27,28 +29,23 @@ class TemperatureControlCardWidget extends StatelessWidget {
           children: [
             Text('Sıcaklık Kontrol'),
             Expanded(
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      actualTemperature?.toStringAsFixed(0) ?? '--',
-                      style: const TextStyle(
-                        fontSize: 122,
-                        fontWeight: FontWeight.w100,
-                      ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _UnitTemperature(
+                      label: 'Klima #1',
+                      temperature: unitATemperature,
                     ),
-                    const Text(
-                      '°C',
-                      style: TextStyle(
-                        fontSize: 48,
-                        height: 1,
-                        fontWeight: FontWeight.w100,
-                      ),
+                  ),
+                  const VerticalDivider(width: 1),
+                  Expanded(
+                    child: _UnitTemperature(
+                      label: 'Klima #2',
+                      temperature: unitBTemperature,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             Row(
@@ -72,6 +69,53 @@ class TemperatureControlCardWidget extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A single unit's actual temperature reading, scaled down to fit
+/// alongside its sibling unit so both are visible at the same time.
+class _UnitTemperature extends StatelessWidget {
+  const _UnitTemperature({required this.label, required this.temperature});
+
+  final String label;
+  final double? temperature;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.titleMedium),
+        Expanded(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  temperature?.toStringAsFixed(0) ?? '--',
+                  style: const TextStyle(
+                    fontSize: 72,
+                    fontWeight: FontWeight.w100,
+                  ),
+                ),
+                const Text(
+                  '°C',
+                  style: TextStyle(
+                    fontSize: 28,
+                    height: 1,
+                    fontWeight: FontWeight.w100,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

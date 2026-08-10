@@ -26,6 +26,10 @@ const int one = 0x01;
 const int maxConsecutiveCommunicationTimeouts = 3;
 const Duration disconnectedUnitProbeInterval = Duration(minutes: 10);
 const Duration temperatureSampleInterval = Duration(seconds: 30);
+// When auto mode rotates to the other unit, the newly started unit needs a
+// moment to actually begin cooling. To avoid a perceived "not cooling" gap,
+// both units run together for this long before the outgoing one shuts off.
+const Duration autoRotationOverlapDuration = Duration(seconds: 30);
 
 class AppController extends GetxController {
   late final ConnectivityService _connectivityService;
@@ -218,12 +222,19 @@ class AppController extends GetxController {
     update();
   }
 
-  void requestTurnOn(int deviceId, {bool isAutomatic = false}) {
+  void requestTurnOn(
+    int deviceId, {
+    bool isAutomatic = false,
+    bool turnOffOtherImmediately = true,
+  }) {
     if (unitFor(deviceId).isRunning || !canTurnOn(deviceId)) return;
     if (!isAutomatic) setAutoMode(false);
     // In automatic mode we still rotate: only one unit runs at a time.
     // In manual mode the user may run both units simultaneously.
-    if (isAutomatic) {
+    // During a scheduled rotation the caller starts the incoming unit
+    // first and defers shutting the outgoing one off (see
+    // [_evaluateAutomation]), so this immediate-off path is skipped then.
+    if (isAutomatic && turnOffOtherImmediately) {
       final otherDeviceId = deviceId == SerialKeys.device1
           ? SerialKeys.device2
           : SerialKeys.device1;
@@ -1109,11 +1120,30 @@ class AppController extends GetxController {
     final rotationDeviceId = runningUnit.deviceId == SerialKeys.device1
         ? SerialKeys.device2
         : SerialKeys.device1;
-    requestTurnOn(rotationDeviceId, isAutomatic: true);
+    if (!canTurnOn(rotationDeviceId)) return;
+    // Start the incoming unit while keeping the outgoing one running, then
+    // shut the outgoing one off after an overlap period so cooling isn't
+    // interrupted while the incoming unit ramps up.
+    requestTurnOn(
+      rotationDeviceId,
+      isAutomatic: true,
+      turnOffOtherImmediately: false,
+    );
+    _scheduleAutoRotationShutdown(runningUnit.deviceId);
     _nextAutoSwitchAt = now.add(
       Duration(minutes: _settingsService.settings.autoSwitchIntervalMinutes),
     );
     update();
+  }
+
+  /// Turns [outgoingDeviceId] off after [autoRotationOverlapDuration], as
+  /// long as auto mode is still active and the unit is still running (the
+  /// user may have intervened manually in the meantime).
+  void _scheduleAutoRotationShutdown(int outgoingDeviceId) {
+    Timer(autoRotationOverlapDuration, () {
+      if (!isAutoMode || !unitFor(outgoingDeviceId).isRunning) return;
+      requestTurnOff(outgoingDeviceId, isAutomatic: true, force: true);
+    });
   }
 
   void _setTxEnable(bool value) {

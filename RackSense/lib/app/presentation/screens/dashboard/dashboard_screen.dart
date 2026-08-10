@@ -112,7 +112,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Expanded(
                             child: TemperatureControlCardWidget(
                               value: targetTemperature,
-                              actualTemperature: controller.rackTemperature,
+                              unitATemperature: controller
+                                  .unitFor(SerialKeys.device1)
+                                  .ntc1
+                                  ?.toDouble(),
+                              unitBTemperature: controller
+                                  .unitFor(SerialKeys.device2)
+                                  .ntc1
+                                  ?.toDouble(),
                               onDecrease: () =>
                                   _changeTemperature(controller, -1),
                               onIncrease: () =>
